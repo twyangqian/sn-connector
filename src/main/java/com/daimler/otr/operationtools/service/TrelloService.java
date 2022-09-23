@@ -40,15 +40,21 @@ public class TrelloService {
         String newTrelloCardDesc = serviceNowEntryDTO.get().getShortDescription();
 
         TrelloConfiguration trelloConfiguration = TrelloConfiguration.builder()
-                                                       .trelloApiKey(createTrelloCardDTO.getTrelloApiKey())
-                                                       .trelloApiToken(createTrelloCardDTO.getTrelloApiToken())
-                                                       .trelloBoardId(createTrelloCardDTO.getTrelloBoardId())
-                                                       .build();
+                                                                     .trelloApiKey(createTrelloCardDTO.getTrelloApiKey())
+                                                                     .trelloApiToken(createTrelloCardDTO.getTrelloApiToken())
+                                                                     .trelloBoardId(createTrelloCardDTO.getTrelloBoardId())
+                                                                     .build();
         TrelloClient trelloClient = new TrelloClient(trelloConfiguration);
 
         List<TList> trelloCardList = trelloClient.getCardListCollection();
         String trelloCardListId = getOrCreateTrelloCardListId(trelloClient, trelloCardList);
         log.info("TODO trello card list id is {}", trelloCardListId);
+
+        if (trelloClient.getListCards(trelloCardListId)
+                        .stream()
+                        .anyMatch(card -> card.getName().equals(newTrelloCardName))) {
+            throw new TrelloException("this trello card has been created!");
+        }
 
         TrelloCard newTrelloCard = TrelloCard.builder()
                                      .name(newTrelloCardName)
