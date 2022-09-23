@@ -50,11 +50,7 @@ public class TrelloService {
         String trelloCardListId = getOrCreateTrelloCardListId(trelloClient, trelloCardList);
         log.info("TODO trello card list id is {}", trelloCardListId);
 
-        if (trelloClient.getListCards(trelloCardListId)
-                        .stream()
-                        .anyMatch(card -> card.getName().equals(newTrelloCardName))) {
-            throw new TrelloException("this trello card has been created!");
-        }
+        checkCardIsExists(newTrelloCardName, trelloClient, trelloCardListId);
 
         TrelloCard newTrelloCard = TrelloCard.builder()
                                      .name(newTrelloCardName)
@@ -62,6 +58,14 @@ public class TrelloService {
                                      .idList(trelloCardListId)
                                      .build();
         return trelloClient.createCard(newTrelloCard);
+    }
+
+    private void checkCardIsExists(String newTrelloCardName, TrelloClient trelloClient, String trelloCardListId) {
+        if (trelloClient.getListCards(trelloCardListId)
+                        .stream()
+                        .anyMatch(card -> card.getName().equals(newTrelloCardName))) {
+            throw new TrelloException("this trello card has been created!");
+        }
     }
 
     private String getOrCreateTrelloCardListId(TrelloClient trelloClient, List<TList> trelloCardList) {
