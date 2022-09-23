@@ -6,6 +6,7 @@ import com.daimler.otr.operationtools.dto.TrelloCardListDTO;
 import com.daimler.otr.operationtools.exception.TrelloException;
 import com.julienvey.trello.Trello;
 import com.julienvey.trello.domain.Board;
+import com.julienvey.trello.domain.Card;
 import com.julienvey.trello.domain.Label;
 import com.julienvey.trello.domain.Member;
 import com.julienvey.trello.domain.TList;
@@ -68,6 +69,10 @@ public class TrelloClient {
                                           .build().toUri();
 
         return restTemplate.postForObject(fullUri, card, TrelloCard.class);
+    }
+
+    public List<Card> getListCards(String cardListId) {
+        return trelloApi.getListCards(cardListId);
     }
 
     public List<Label> getLabels() {
