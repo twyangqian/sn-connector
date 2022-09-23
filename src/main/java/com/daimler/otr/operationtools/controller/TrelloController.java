@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @AllArgsConstructor
-@RequestMapping("/api/operation/tools")
+@RequestMapping("/api/operation/tools/trello")
 @Slf4j
 public class TrelloController {
 
     private final TrelloService trelloService;
 
-    @PostMapping("/trello-cards")
+    @PostMapping("/cards")
     public ResponseEntity<TrelloCard> createTrelloCard(@RequestBody CreateTrelloCardDTO createTrelloCardDTO) {
         return ResponseEntity.ok(trelloService.createTrelloCard(createTrelloCardDTO));
     }
