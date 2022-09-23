@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'com.daimler.otr.operation-tools' is invalid and this project uses 'com.daimler.otr.operationtools' instead.
+* The original package name 'com.thoughtworks.otr.sn-connector' is invalid and this project uses 'com.thoughtworks.otr.snconnector' instead.
 
 # Getting Started
 

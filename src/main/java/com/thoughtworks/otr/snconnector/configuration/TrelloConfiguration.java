@@ -1,4 +1,4 @@
-package com.daimler.otr.operationtools.configuration;
+package com.thoughtworks.otr.snconnector.configuration;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

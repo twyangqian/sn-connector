@@ -1,9 +1,9 @@
-package com.daimler.otr.operationtools.client;
+package com.thoughtworks.otr.snconnector.client;
 
-import com.daimler.otr.operationtools.configuration.TrelloConfiguration;
-import com.daimler.otr.operationtools.dto.TrelloCard;
-import com.daimler.otr.operationtools.dto.TrelloCardListDTO;
-import com.daimler.otr.operationtools.exception.TrelloException;
+import com.thoughtworks.otr.snconnector.configuration.TrelloConfiguration;
+import com.thoughtworks.otr.snconnector.dto.TrelloCard;
+import com.thoughtworks.otr.snconnector.dto.TrelloCardListDTO;
+import com.thoughtworks.otr.snconnector.exception.TrelloException;
 import com.julienvey.trello.Trello;
 import com.julienvey.trello.domain.Board;
 import com.julienvey.trello.domain.Card;

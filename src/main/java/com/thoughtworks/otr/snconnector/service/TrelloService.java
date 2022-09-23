@@ -1,11 +1,11 @@
-package com.daimler.otr.operationtools.service;
+package com.thoughtworks.otr.snconnector.service;
 
-import com.daimler.otr.operationtools.client.TrelloClient;
-import com.daimler.otr.operationtools.configuration.TrelloConfiguration;
-import com.daimler.otr.operationtools.dto.CreateTrelloCardDTO;
-import com.daimler.otr.operationtools.dto.ServiceNowEntryDTO;
-import com.daimler.otr.operationtools.dto.TrelloCard;
-import com.daimler.otr.operationtools.exception.TrelloException;
+import com.thoughtworks.otr.snconnector.client.TrelloClient;
+import com.thoughtworks.otr.snconnector.configuration.TrelloConfiguration;
+import com.thoughtworks.otr.snconnector.dto.CreateTrelloCardDTO;
+import com.thoughtworks.otr.snconnector.dto.ServiceNowEntryDTO;
+import com.thoughtworks.otr.snconnector.dto.TrelloCard;
+import com.thoughtworks.otr.snconnector.exception.TrelloException;
 import com.julienvey.trello.domain.TList;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

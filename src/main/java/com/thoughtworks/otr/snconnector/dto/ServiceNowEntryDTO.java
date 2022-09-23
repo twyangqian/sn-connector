@@ -1,4 +1,4 @@
-package com.daimler.otr.operationtools.dto;
+package com.thoughtworks.otr.snconnector.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

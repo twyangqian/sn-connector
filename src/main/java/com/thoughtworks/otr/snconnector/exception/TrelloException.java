@@ -1,4 +1,4 @@
-package com.daimler.otr.operationtools.exception;
+package com.thoughtworks.otr.snconnector.exception;
 
 public class TrelloException extends RuntimeException{
     public TrelloException(String message) {

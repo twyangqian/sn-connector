@@ -1,4 +1,4 @@
-package com.daimler.otr.operationtools.exception;
+package com.thoughtworks.otr.snconnector.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,13 +1,13 @@
-package com.daimler.otr.operationtools;
+package com.thoughtworks.otr.snconnector;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class OperationToolsApplication {
+public class SnConnectorApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(OperationToolsApplication.class, args);
+		SpringApplication.run(SnConnectorApplication.class, args);
 	}
 
 }

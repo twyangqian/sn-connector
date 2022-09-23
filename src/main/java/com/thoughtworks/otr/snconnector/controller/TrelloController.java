@@ -1,8 +1,8 @@
-package com.daimler.otr.operationtools.controller;
+package com.thoughtworks.otr.snconnector.controller;
 
-import com.daimler.otr.operationtools.dto.CreateTrelloCardDTO;
-import com.daimler.otr.operationtools.dto.TrelloCard;
-import com.daimler.otr.operationtools.service.TrelloService;
+import com.thoughtworks.otr.snconnector.dto.CreateTrelloCardDTO;
+import com.thoughtworks.otr.snconnector.dto.TrelloCard;
+import com.thoughtworks.otr.snconnector.service.TrelloService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @AllArgsConstructor
-@RequestMapping("/api/operation/tools/trello")
+@RequestMapping("/api/sn-connector/trello")
 @Slf4j
 public class TrelloController {
 
