@@ -16,7 +16,6 @@ import java.util.Map;
 public class CustomFieldItem {
 
     private String id;
-    private String cardId;
     private Map<String, String> value;
     private String idCustomField;
     private String idModel;
