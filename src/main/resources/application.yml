@@ -1,1 +1,4 @@
-
+trello:
+  config:
+    trello-api-key: 78c8532ccf8ea1c9dd67dfb839de0327
+    trello-api-token: ed1073f504032ba6be68a45d747f91dc94fa5680f65cdd1d634f4d5ad864cb7e

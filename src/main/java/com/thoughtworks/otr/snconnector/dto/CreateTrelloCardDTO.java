@@ -16,10 +16,6 @@ import javax.validation.constraints.NotBlank;
 public class CreateTrelloCardDTO {
 
     @NotBlank
-    private String trelloApiKey;
-    @NotBlank
-    private String trelloApiToken;
-    @NotBlank
     private String trelloBoardId;
     @NotBlank
     private ServiceNowDTO serviceNowData;
