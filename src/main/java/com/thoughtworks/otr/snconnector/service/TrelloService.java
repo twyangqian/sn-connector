@@ -1,6 +1,8 @@
 package com.thoughtworks.otr.snconnector.service;
 
-import com.thoughtworks.otr.snconnector.client.TrelloClient;
+import com.thoughtworks.otr.snconnector.client.impl.TrelloBoardClientImpl;
+import com.thoughtworks.otr.snconnector.client.impl.TrelloCardClientImpl;
+import com.thoughtworks.otr.snconnector.client.impl.TrelloListCardClientImpl;
 import com.thoughtworks.otr.snconnector.configuration.TrelloConfiguration;
 import com.thoughtworks.otr.snconnector.dto.CreateTrelloCardDTO;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowEntryDTO;
@@ -21,6 +23,10 @@ public class TrelloService {
 
     private static final String DEFAULT_TRELLO_CARD_LIST_NAME = "TODO";
 
+    private TrelloBoardClientImpl trelloBoardClient;
+    private TrelloListCardClientImpl trelloListCardClient;
+    private TrelloCardClientImpl trelloCardClient;
+
     public TrelloCard createTrelloCard(CreateTrelloCardDTO createTrelloCardDTO) {
         log.info("trello api Key: {}, trello api token: {}, trello board id: {}",
                 createTrelloCardDTO.getTrelloApiKey(),
@@ -34,45 +40,52 @@ public class TrelloService {
             throw new TrelloException("no data in service now request body");
         }
 
+        prepareTrelloClient(createTrelloCardDTO);
+
         String newTrelloCardName = serviceNowEntryDTO.get().getDisplayValue() + " " +
                 serviceNowEntryDTO.get().getShortDescription();
 
         String newTrelloCardDesc = serviceNowEntryDTO.get().getShortDescription();
 
+        List<TList> trelloCardList = trelloBoardClient.getBoardListCards();
+        String trelloListCardId = getOrCreateTrelloCardListId(trelloCardList);
+        log.info("TODO trello card list id is {}", trelloListCardId);
+
+        checkCardIsExists(newTrelloCardName, trelloListCardId);
+
+        TrelloCard newTrelloCard = TrelloCard.builder()
+                                     .name(newTrelloCardName)
+                                     .desc(newTrelloCardDesc)
+                                     .idList(trelloListCardId)
+                                     .build();
+        return trelloCardClient.createCard(newTrelloCard);
+    }
+
+    private void prepareTrelloClient(CreateTrelloCardDTO createTrelloCardDTO) {
         TrelloConfiguration trelloConfiguration = TrelloConfiguration.builder()
                                                                      .trelloApiKey(createTrelloCardDTO.getTrelloApiKey())
                                                                      .trelloApiToken(createTrelloCardDTO.getTrelloApiToken())
                                                                      .trelloBoardId(createTrelloCardDTO.getTrelloBoardId())
                                                                      .build();
-        TrelloClient trelloClient = new TrelloClient(trelloConfiguration);
+        this.trelloBoardClient = new TrelloBoardClientImpl(trelloConfiguration);
+        this.trelloListCardClient = new TrelloListCardClientImpl(trelloConfiguration);
+        this.trelloCardClient = new TrelloCardClientImpl(trelloConfiguration);
 
-        List<TList> trelloCardList = trelloClient.getCardListCollection();
-        String trelloCardListId = getOrCreateTrelloCardListId(trelloClient, trelloCardList);
-        log.info("TODO trello card list id is {}", trelloCardListId);
-
-        checkCardIsExists(newTrelloCardName, trelloClient, trelloCardListId);
-
-        TrelloCard newTrelloCard = TrelloCard.builder()
-                                     .name(newTrelloCardName)
-                                     .desc(newTrelloCardDesc)
-                                     .idList(trelloCardListId)
-                                     .build();
-        return trelloClient.createCard(newTrelloCard);
     }
 
-    private void checkCardIsExists(String newTrelloCardName, TrelloClient trelloClient, String trelloCardListId) {
-        if (trelloClient.getListCards(trelloCardListId)
+    private void checkCardIsExists(String newTrelloCardName, String trelloCardListId) {
+        if (trelloListCardClient.getListCardCards(trelloCardListId)
                         .stream()
                         .anyMatch(card -> card.getName().equals(newTrelloCardName))) {
             throw new TrelloException("this trello card has been created!");
         }
     }
 
-    private String getOrCreateTrelloCardListId(TrelloClient trelloClient, List<TList> trelloCardList) {
+    private String getOrCreateTrelloCardListId(List<TList> trelloCardList) {
         return trelloCardList.stream()
                       .filter(trelloList -> trelloList.getName().equals(DEFAULT_TRELLO_CARD_LIST_NAME))
                       .findFirst()
                       .map(TList::getId)
-                      .orElseGet(() -> trelloClient.createCardList(DEFAULT_TRELLO_CARD_LIST_NAME));
+                      .orElseGet(() -> trelloBoardClient.createBoardListCard(DEFAULT_TRELLO_CARD_LIST_NAME));
     }
 }
