@@ -7,6 +7,7 @@ import com.thoughtworks.otr.snconnector.configuration.TrelloConfiguration;
 import com.thoughtworks.otr.snconnector.constans.TrelloUrlConstant;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Objects;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
+@Component
 public class TrelloCardClientImpl extends TrelloClient implements TrelloCardClient {
     public TrelloCardClientImpl(TrelloConfiguration trelloConfiguration) {
         super(trelloConfiguration);

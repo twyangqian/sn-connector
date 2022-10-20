@@ -6,10 +6,12 @@ import com.julienvey.trello.impl.http.JDKTrelloHttpClient;
 import com.thoughtworks.otr.snconnector.configuration.TrelloConfiguration;
 import lombok.Getter;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Getter
+@Component
 public class TrelloClient {
     private final TrelloConfiguration trelloConfiguration;
     private final Trello trelloApi;
