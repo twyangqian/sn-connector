@@ -1,9 +1,5 @@
 package com.thoughtworks.otr.snconnector.client;
 
-import com.thoughtworks.otr.snconnector.configuration.TrelloConfiguration;
-import com.thoughtworks.otr.snconnector.dto.TrelloCard;
-import com.thoughtworks.otr.snconnector.dto.TrelloCardListDTO;
-import com.thoughtworks.otr.snconnector.exception.TrelloException;
 import com.julienvey.trello.Trello;
 import com.julienvey.trello.domain.Board;
 import com.julienvey.trello.domain.Card;
@@ -13,6 +9,10 @@ import com.julienvey.trello.domain.TList;
 import com.julienvey.trello.impl.TrelloImpl;
 import com.julienvey.trello.impl.TrelloUrl;
 import com.julienvey.trello.impl.http.JDKTrelloHttpClient;
+import com.thoughtworks.otr.snconnector.configuration.TrelloConfiguration;
+import com.thoughtworks.otr.snconnector.dto.TrelloCard;
+import com.thoughtworks.otr.snconnector.dto.TrelloCardListDTO;
+import com.thoughtworks.otr.snconnector.exception.TrelloException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -44,10 +44,8 @@ public class TrelloClient {
 
     public String createCardList(String trelloListName) {
         String url = TrelloUrl.API_URL + TrelloUrl.GET_BOARD_LISTS;
-        URI fullUri = UriComponentsBuilder.fromUriString(url)
+        URI fullUri = getUriComponentsBuilder(url)
                                           .queryParam("name", trelloListName)
-                                          .queryParam("key", trelloConfiguration.getTrelloApiKey())
-                                          .queryParam("token", trelloConfiguration.getTrelloApiToken())
                                           .buildAndExpand(trelloConfiguration.getTrelloBoardId()).toUri();
 
         TrelloCardListDTO trelloCardListDTO = restTemplate.postForObject(fullUri, null, TrelloCardListDTO.class);
@@ -63,9 +61,7 @@ public class TrelloClient {
 
     public TrelloCard createCard(TrelloCard card) {
         String url = TrelloUrl.API_URL + TrelloUrl.CREATE_CARD;
-        URI fullUri = UriComponentsBuilder.fromUriString(url)
-                                          .queryParam("key", trelloConfiguration.getTrelloApiKey())
-                                          .queryParam("token", trelloConfiguration.getTrelloApiToken())
+        URI fullUri = getUriComponentsBuilder(url)
                                           .build().toUri();
 
         return restTemplate.postForObject(fullUri, card, TrelloCard.class);
@@ -79,5 +75,11 @@ public class TrelloClient {
         return trelloApi.getBoardLabels(trelloConfiguration.getTrelloBoardId()).stream()
                         .filter(label -> StringUtils.isNotBlank(label.getName()))
                         .collect(Collectors.toList());
+    }
+
+    private UriComponentsBuilder getUriComponentsBuilder(String url) {
+        return UriComponentsBuilder.fromUriString(url)
+                                   .queryParam("key", trelloConfiguration.getTrelloApiKey())
+                                   .queryParam("token", trelloConfiguration.getTrelloApiToken());
     }
 }
