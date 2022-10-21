@@ -1,6 +1,7 @@
 package com.thoughtworks.otr.snconnector.client.impl;
 
 import com.julienvey.trello.domain.Board;
+import com.julienvey.trello.domain.Card;
 import com.julienvey.trello.domain.Label;
 import com.julienvey.trello.domain.Member;
 import com.julienvey.trello.domain.TList;
@@ -29,6 +30,11 @@ public class TrelloBoardClientImpl extends TrelloClient implements TrelloBoardCl
 
     public TrelloBoardClientImpl(TrelloConfiguration trelloConfiguration) {
         super(trelloConfiguration);
+    }
+
+    @Override
+    public List<Card> getBoardCards(String boardId) {
+        return super.getTrelloApi().getBoardCards(boardId);
     }
 
     @Override
