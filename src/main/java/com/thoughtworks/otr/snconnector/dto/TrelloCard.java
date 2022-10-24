@@ -22,4 +22,5 @@ public class TrelloCard extends Card {
     private String desc;
     private List<String> idMembers;
     private List<Label> labels;
+    private List<CustomFieldItem> customFieldItems;
 }
