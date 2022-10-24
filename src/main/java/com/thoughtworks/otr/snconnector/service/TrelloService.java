@@ -158,7 +158,6 @@ public class TrelloService {
                                                              .idList(trelloListCardId)
                                                              .build());
         }
-        trelloCard.setTrelloCardComments(new ArrayList<>());
         return trelloCard;
     }
 
