@@ -11,4 +11,5 @@ public interface TrelloCardClient {
     List<CustomFieldItem> getCardCustomFieldItems(String cardId);
     void updateCardCustomFieldItem(String cardId, String customFiledItemId, CustomFieldItem updateCustomFieldItem);
     List<TrelloAction> getCardActions(String cardId);
+    void createCardComment(String cardId, String commentText);
 }

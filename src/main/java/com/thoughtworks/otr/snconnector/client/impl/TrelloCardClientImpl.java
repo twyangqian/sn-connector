@@ -64,4 +64,9 @@ public class TrelloCardClientImpl extends TrelloClient implements TrelloCardClie
         TrelloAction[] cardComments = super.getRestTemplate().getForObject(fullUrl, TrelloAction[].class);
         return Objects.nonNull(cardComments) ? asList(cardComments) : emptyList();
     }
+
+    @Override
+    public void createCardComment(String cardId, String commentText) {
+        super.getTrelloApi().addCommentToCard(cardId, commentText);
+    }
 }
