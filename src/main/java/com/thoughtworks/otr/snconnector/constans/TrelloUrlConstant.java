@@ -9,4 +9,5 @@ public class TrelloUrlConstant {
 
     public static final String GET_CARD_CUSTOM_FIELD_ITEMS = "/cards/{cardId}/customFieldItems?";
     public static final String UPDATE_CARD_CUSTOM_FIELD_ITEM = "/cards/{cardId}/customField/{customFieldId}/item?";
+    public static final String GET_CARD_ACTIONS = "/cards/{id}/actions?";
 }
