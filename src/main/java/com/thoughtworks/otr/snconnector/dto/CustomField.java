@@ -1,13 +1,11 @@
 package com.thoughtworks.otr.snconnector.dto;
 
-import com.thoughtworks.otr.snconnector.enums.CustomFieldType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -19,27 +17,14 @@ public class CustomField {
     private String idModel;
     private String modelType;
     private String fieldGroup;
-    private CustomFieldType type;
-    private CustomFieldDisplay display;
+    private String type;
 
-    @Getter
-    @Setter
-    @Builder
-    public static class CustomFieldDisplay {
-        private boolean cardFront;
-        private String name;
-        private String pos;
-        private List<DisplayOption> options;
+    @JsonProperty("display")
+    private Object display;
 
-        @Getter
-        @Setter
-        @Builder
-        public static class DisplayOption {
-            private String id;
-            private String idCustomField;
-            private Object value;
-            private String color;
-            private String pos;
-        }
-    }
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("pos")
+    private String pos;
 }
