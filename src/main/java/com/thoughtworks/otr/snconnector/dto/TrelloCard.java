@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -22,6 +23,10 @@ public class TrelloCard extends Card {
     private String desc;
     private List<String> idMembers;
     private List<Label> labels;
-    private List<CustomFieldItem> customFieldItems;
-    private List<TrelloCardComment> trelloCardComments;
+
+    @Builder.Default
+    private List<CustomFieldItem> customFieldItems = new ArrayList<>();
+
+    @Builder.Default
+    private List<TrelloCardComment> trelloCardComments = new ArrayList<>();
 }

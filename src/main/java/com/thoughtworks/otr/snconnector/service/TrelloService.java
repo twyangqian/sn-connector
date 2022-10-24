@@ -76,11 +76,9 @@ public class TrelloService {
 
 
         serviceNowEntryDTOS.forEach(entry -> {
-            setValueForCardCustomFieldItem(customFieldMap, cardCustomFiledItemMap, entry);
+            createTrelloCardCustomFieldItem(customFieldMap, cardCustomFiledItemMap, entry, trelloCard);
             createTrelloCardComments(trelloCard, trelloActionMap, entry);
         });
-
-        updateCardCustomFieldItemValueByCallTrelloAPI(trelloCard, cardCustomFiledItemMap);
 
         return trelloCard;
     }
@@ -101,22 +99,10 @@ public class TrelloService {
         });
     }
 
-    private void updateCardCustomFieldItemValueByCallTrelloAPI(TrelloCard trelloCard, Map<String, CustomFieldItem> cardCustomFiledItemMap) {
-        List<CustomFieldItem> cardCustomFieldItems = new ArrayList<>();
-        cardCustomFiledItemMap.forEach((key, customFieldItem) -> {
-                   if (Objects.nonNull(customFieldItem.getValue())) {
-                       trelloCardClient.updateCardCustomFieldItem(
-                               trelloCard.getId(), customFieldItem.getIdCustomField(), customFieldItem);
-                       cardCustomFieldItems.add(customFieldItem);
-                   }
-                }
-        );
-        trelloCard.setCustomFieldItems(cardCustomFieldItems);
-    }
-
-    private void setValueForCardCustomFieldItem(Map<String, CustomField> customFieldMap,
-                                                Map<String, CustomFieldItem> cardCustomFiledItemMap,
-                                                ServiceNowEntryDTO entry) {
+    private void createTrelloCardCustomFieldItem(Map<String, CustomField> customFieldMap,
+                                                 Map<String, CustomFieldItem> cardCustomFiledItemMap,
+                                                 ServiceNowEntryDTO entry,
+                                                 TrelloCard trelloCard) {
         entry.getEntries().getChanges().forEach(change -> {
                     CustomField customField = customFieldMap.get(change.getFieldName().getTrelloFieldName());
                     if (Objects.nonNull(customField)) {
@@ -124,6 +110,14 @@ public class TrelloService {
                                               .setValue(Map.of(customField.getType(), change.getNewValue()));
                     }
                 });
+        cardCustomFiledItemMap.values().forEach(customFieldItem -> {
+                    if (Objects.nonNull(customFieldItem.getValue())) {
+                        trelloCardClient.updateCardCustomFieldItem(
+                                trelloCard.getId(), customFieldItem.getIdCustomField(), customFieldItem);
+                        trelloCard.getCustomFieldItems().add(customFieldItem);
+                    }
+                }
+        );
     }
 
     private CustomFieldItem buildCustomFieldItem(String ticket, String ticketOpenDate, Map.Entry<String, CustomField> customField) {
