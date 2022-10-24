@@ -54,12 +54,15 @@ public class TrelloService {
         String newTrelloCardName = ticketNumber + " " + earliestServiceNowEntry.get().getShortDescription();
         String newTrelloCardDesc = earliestServiceNowEntry.get().getShortDescription();
 
+        log.info("ticket number: {}, ticket open date: {}, trello card name: {}", ticketNumber, ticketOpenDate, newTrelloCardName);
+
         List<TList> trelloListCards = trelloBoardClient.getBoardListCards(createTrelloCardDTO.getTrelloBoardId());
         String trelloListCardId = getOrCreateTODOTrelloListCard(createTrelloCardDTO.getTrelloBoardId(), trelloListCards);
         log.info("TODO trello list card id is {}", trelloListCardId);
 
         TrelloCard trelloCard = getOrCreateTrelloCard(createTrelloCardDTO, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
+        log.info("get trello card actions");
         Map<String, TrelloAction> trelloActionMap = trelloCardClient.getCardActions(trelloCard.getId())
                                                             .stream()
                                                             .collect(
@@ -67,6 +70,7 @@ public class TrelloService {
                                                                             trelloAction -> trelloAction.getData().getText(),
                                                                             Function.identity()));
 
+        log.info("get trello board custom field");
         Map<String, CustomField> customFieldMap = buildBoardCustomFieldMap(createTrelloCardDTO);
         Map<String, CustomFieldItem> cardCustomFiledItemMap =
                 customFieldMap.entrySet()
@@ -75,6 +79,7 @@ public class TrelloService {
                               .collect(Collectors.toMap(CustomFieldItem::getIdCustomField, Function.identity()));
 
 
+        log.info("create trello card custom field item and comments");
         serviceNowEntryDTOS.forEach(entry -> {
             createTrelloCardCustomFieldItem(customFieldMap, cardCustomFiledItemMap, entry, trelloCard);
             createTrelloCardComments(trelloCard, trelloActionMap, entry);
@@ -146,6 +151,7 @@ public class TrelloService {
         if (Objects.nonNull(oldTrelloCard)) {
             trelloCard = oldTrelloCard;
         } else {
+            log.info("create trello card: {}", newTrelloCardName);
             trelloCard = trelloCardClient.createCard(TrelloCard.builder()
                                                              .name(newTrelloCardName)
                                                              .desc(newTrelloCardDesc)
