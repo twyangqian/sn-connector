@@ -6,6 +6,7 @@ import com.thoughtworks.otr.snconnector.client.TrelloClient;
 import com.thoughtworks.otr.snconnector.configuration.TrelloConfiguration;
 import com.thoughtworks.otr.snconnector.constans.TrelloUrlConstant;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
+import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
 import org.springframework.stereotype.Component;
 
@@ -52,5 +53,15 @@ public class TrelloCardClientImpl extends TrelloClient implements TrelloCardClie
                                 "customFieldId", customFiledItemId))
                 .toUri();
         super.getRestTemplate().put(fullUrl, updateCustomFieldItem);
+    }
+
+    @Override
+    public List<TrelloAction> getCardActions(String cardId) {
+        String url = TrelloUrl.API_URL + TrelloUrlConstant.GET_CARD_ACTIONS;
+        URI fullUrl = buildFullURLBuilder(url)
+                .buildAndExpand(cardId)
+                .toUri();
+        TrelloAction[] cardComments = super.getRestTemplate().getForObject(fullUrl, TrelloAction[].class);
+        return Objects.nonNull(cardComments) ? asList(cardComments) : emptyList();
     }
 }
