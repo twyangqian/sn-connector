@@ -8,7 +8,9 @@ import com.thoughtworks.otr.snconnector.dto.CreateTrelloCardDTO;
 import com.thoughtworks.otr.snconnector.dto.CustomField;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowEntryDTO;
+import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
+import com.thoughtworks.otr.snconnector.dto.TrelloCardComment;
 import com.thoughtworks.otr.snconnector.exception.TrelloException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +60,13 @@ public class TrelloService {
 
         TrelloCard trelloCard = getOrCreateTrelloCard(createTrelloCardDTO, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
+        Map<String, TrelloAction> trelloActionMap = trelloCardClient.getCardActions(trelloCard.getId())
+                                                            .stream()
+                                                            .collect(
+                                                                    Collectors.toMap(
+                                                                            trelloAction -> trelloAction.getData().getText(),
+                                                                            Function.identity()));
+
         Map<String, CustomField> customFieldMap = buildBoardCustomFieldMap(createTrelloCardDTO);
         Map<String, CustomFieldItem> cardCustomFiledItemMap =
                 customFieldMap.entrySet()
@@ -68,12 +77,28 @@ public class TrelloService {
 
         serviceNowEntryDTOS.forEach(entry -> {
             setValueForCardCustomFieldItem(customFieldMap, cardCustomFiledItemMap, entry);
+            createTrelloCardComments(trelloCard, trelloActionMap, entry);
         });
 
         updateCardCustomFieldItemValueByCallTrelloAPI(trelloCard, cardCustomFiledItemMap);
 
-
         return trelloCard;
+    }
+
+    private void createTrelloCardComments(TrelloCard trelloCard, Map<String, TrelloAction> trelloActionMap, ServiceNowEntryDTO entry) {
+        entry.getEntries().getJournal().forEach(journal -> {
+            TrelloCardComment trelloCardComment = TrelloCardComment.builder()
+                                                       .createdBy(entry.getSysCreatedBy())
+                                                       .createdDate(entry.getSysCreatedOnAdjusted())
+                                                       .commentType(journal.getFieldName().getLabel())
+                                                       .commentText(journal.getNewValue())
+                                                       .build();
+            String commentText = trelloCardComment.buildTrelloCardCommentText();
+            if (Objects.isNull(trelloActionMap.get(commentText))) {
+                trelloCardClient.createCardComment(trelloCard.getId(), commentText);
+            }
+            trelloCard.getTrelloCardComments().add(trelloCardComment);
+        });
     }
 
     private void updateCardCustomFieldItemValueByCallTrelloAPI(TrelloCard trelloCard, Map<String, CustomFieldItem> cardCustomFiledItemMap) {
@@ -133,6 +158,7 @@ public class TrelloService {
                                                              .idList(trelloListCardId)
                                                              .build());
         }
+        trelloCard.setTrelloCardComments(new ArrayList<>());
         return trelloCard;
     }
 

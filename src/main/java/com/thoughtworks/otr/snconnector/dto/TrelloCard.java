@@ -23,4 +23,5 @@ public class TrelloCard extends Card {
     private List<String> idMembers;
     private List<Label> labels;
     private List<CustomFieldItem> customFieldItems;
+    private List<TrelloCardComment> trelloCardComments;
 }
