@@ -14,9 +14,6 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateTrelloCardDTO {
-
-    @NotBlank
-    private String trelloBoardId;
     @NotBlank
     private ServiceNowDTO serviceNowData;
 }

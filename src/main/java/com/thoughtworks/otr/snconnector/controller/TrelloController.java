@@ -10,6 +10,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.validation.constraints.NotBlank;
 
 @Controller
 @AllArgsConstructor
@@ -20,7 +23,9 @@ public class TrelloController {
     private final TrelloService trelloService;
 
     @PostMapping("/cards")
-    public ResponseEntity<TrelloCard> createTrelloCard(@RequestBody CreateTrelloCardDTO createTrelloCardDTO) {
-        return ResponseEntity.ok(trelloService.createTrelloCard(createTrelloCardDTO));
+    public ResponseEntity<TrelloCard> createTrelloCard(
+            @RequestParam(name = "boardId") @NotBlank String boardId,
+            @RequestBody CreateTrelloCardDTO createTrelloCardDTO) {
+        return ResponseEntity.ok(trelloService.createTrelloCard(boardId, createTrelloCardDTO));
     }
 }

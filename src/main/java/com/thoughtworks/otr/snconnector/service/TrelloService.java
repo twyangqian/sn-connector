@@ -38,7 +38,7 @@ public class TrelloService {
     private final TrelloListCardClientImpl trelloListCardClient;
     private final TrelloCardClientImpl trelloCardClient;
 
-    public TrelloCard createTrelloCard(CreateTrelloCardDTO createTrelloCardDTO) {
+    public TrelloCard createTrelloCard(String boardId, CreateTrelloCardDTO createTrelloCardDTO) {
         List<ServiceNowEntryDTO> serviceNowEntryDTOS = createTrelloCardDTO.getServiceNowData().getEntries()
                                                               .stream()
                                                               .sorted(Comparator.comparing(ServiceNowEntryDTO::getSysCreatedOnAdjusted))
@@ -56,11 +56,11 @@ public class TrelloService {
 
         log.info("ticket number: {}, ticket open date: {}, trello card name: {}", ticketNumber, ticketOpenDate, newTrelloCardName);
 
-        List<TList> trelloListCards = trelloBoardClient.getBoardListCards(createTrelloCardDTO.getTrelloBoardId());
-        String trelloListCardId = getOrCreateTODOTrelloListCard(createTrelloCardDTO.getTrelloBoardId(), trelloListCards);
+        List<TList> trelloListCards = trelloBoardClient.getBoardListCards(boardId);
+        String trelloListCardId = getOrCreateTODOTrelloListCard(boardId, trelloListCards);
         log.info("TODO trello list card id is {}", trelloListCardId);
 
-        TrelloCard trelloCard = getOrCreateTrelloCard(createTrelloCardDTO, ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
+        TrelloCard trelloCard = getOrCreateTrelloCard(boardId, ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
         log.info("get trello card actions");
         Map<String, TrelloAction> trelloActionMap = trelloCardClient.getCardActions(trelloCard.getId())
@@ -71,7 +71,7 @@ public class TrelloService {
                                                                             Function.identity()));
 
         log.info("get trello board custom field");
-        Map<String, CustomField> customFieldMap = buildBoardCustomFieldMap(createTrelloCardDTO);
+        Map<String, CustomField> customFieldMap = buildBoardCustomFieldMap(boardId);
         Map<String, CustomFieldItem> cardCustomFiledItemMap =
                 customFieldMap.entrySet()
                               .stream()
@@ -138,15 +138,15 @@ public class TrelloService {
         return customFieldItem;
     }
 
-    private Map<String, CustomField> buildBoardCustomFieldMap(CreateTrelloCardDTO createTrelloCardDTO) {
-        return trelloBoardClient.getBoardCustomFields(createTrelloCardDTO.getTrelloBoardId())
+    private Map<String, CustomField> buildBoardCustomFieldMap(String boardId) {
+        return trelloBoardClient.getBoardCustomFields(boardId)
                                 .stream()
                                 .collect(Collectors.toMap(CustomField::getName, Function.identity()));
     }
 
-    private TrelloCard getOrCreateTrelloCard(CreateTrelloCardDTO createTrelloCardDTO, String ticketNumber, String newTrelloCardName, String newTrelloCardDesc, String trelloListCardId) {
+    private TrelloCard getOrCreateTrelloCard(String boardId, String ticketNumber, String newTrelloCardName, String newTrelloCardDesc, String trelloListCardId) {
         TrelloCard trelloCard;
-        TrelloCard oldTrelloCard = getBoardOldCard(ticketNumber, createTrelloCardDTO.getTrelloBoardId());
+        TrelloCard oldTrelloCard = getBoardOldCard(ticketNumber, boardId);
 
         if (Objects.nonNull(oldTrelloCard)) {
             trelloCard = oldTrelloCard;
