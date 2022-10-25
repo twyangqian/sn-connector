@@ -13,7 +13,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServiceNowEntryJournalDTO {
+public class ServiceNowDataEntryItem {
 
     @JsonProperty("field_label")
     private String fieldLabel;

@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServiceNowDTO {
+public class ServiceNowData {
     @NotBlank
-    private List<ServiceNowEntryDTO> entries;
+    private List<ServiceNowDataEntry> entries;
 }

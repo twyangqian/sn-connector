@@ -6,8 +6,8 @@ import com.thoughtworks.otr.snconnector.client.impl.TrelloCardClientImpl;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloListCardClientImpl;
 import com.thoughtworks.otr.snconnector.dto.CustomField;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
-import com.thoughtworks.otr.snconnector.dto.ServiceNowDTO;
-import com.thoughtworks.otr.snconnector.dto.ServiceNowEntryDTO;
+import com.thoughtworks.otr.snconnector.dto.ServiceNowData;
+import com.thoughtworks.otr.snconnector.dto.ServiceNowDataEntry;
 import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardComment;
@@ -37,13 +37,13 @@ public class TrelloService {
     private final TrelloListCardClientImpl trelloListCardClient;
     private final TrelloCardClientImpl trelloCardClient;
 
-    public TrelloCard createTrelloCard(String boardId, ServiceNowDTO serviceNowDTO) {
-        List<ServiceNowEntryDTO> serviceNowEntryDTOS = serviceNowDTO.getEntries()
-                                                              .stream()
-                                                              .sorted(Comparator.comparing(ServiceNowEntryDTO::getSysCreatedOnAdjusted))
-                                                              .collect(Collectors.toList());
+    public TrelloCard createTrelloCard(String boardId, ServiceNowData serviceNowData) {
+        List<ServiceNowDataEntry> serviceNowDataEntries = serviceNowData.getEntries()
+                                                                        .stream()
+                                                                        .sorted(Comparator.comparing(ServiceNowDataEntry::getSysCreatedOnAdjusted))
+                                                                        .collect(Collectors.toList());
 
-        Optional<ServiceNowEntryDTO> earliestServiceNowEntry = serviceNowEntryDTOS.stream().findFirst();
+        Optional<ServiceNowDataEntry> earliestServiceNowEntry = serviceNowDataEntries.stream().findFirst();
         if (earliestServiceNowEntry.isEmpty()) {
             throw new TrelloException("no data in service now request body");
         }
@@ -79,7 +79,7 @@ public class TrelloService {
 
 
         log.info("create trello card custom field item and comments");
-        serviceNowEntryDTOS.forEach(entry -> {
+        serviceNowDataEntries.forEach(entry -> {
             createTrelloCardCustomFieldItem(customFieldMap, cardCustomFiledItemMap, entry, trelloCard);
             createTrelloCardComments(trelloCard, trelloActionMap, entry);
         });
@@ -87,7 +87,7 @@ public class TrelloService {
         return trelloCard;
     }
 
-    private void createTrelloCardComments(TrelloCard trelloCard, Map<String, TrelloAction> trelloActionMap, ServiceNowEntryDTO entry) {
+    private void createTrelloCardComments(TrelloCard trelloCard, Map<String, TrelloAction> trelloActionMap, ServiceNowDataEntry entry) {
         entry.getEntries().getJournal().forEach(journal -> {
             TrelloCardComment trelloCardComment = TrelloCardComment.builder()
                                                        .createdBy(entry.getSysCreatedBy())
@@ -105,7 +105,7 @@ public class TrelloService {
 
     private void createTrelloCardCustomFieldItem(Map<String, CustomField> customFieldMap,
                                                  Map<String, CustomFieldItem> cardCustomFiledItemMap,
-                                                 ServiceNowEntryDTO entry,
+                                                 ServiceNowDataEntry entry,
                                                  TrelloCard trelloCard) {
         entry.getEntries().getChanges().forEach(change -> {
                     CustomField customField = customFieldMap.get(change.getFieldName().getTrelloFieldName());

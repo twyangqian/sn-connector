@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServiceNowEntryDTO {
+public class ServiceNowDataEntry {
 
     @JsonProperty("display_value")
     private String displayValue;
@@ -36,9 +36,9 @@ public class ServiceNowEntryDTO {
     @Setter
     public static class ServiceNowEntryEntries {
         @JsonProperty("journal")
-        private List<ServiceNowEntryJournalDTO> journal;
+        private List<ServiceNowDataEntryItem> journal;
 
         @JsonProperty("changes")
-        private List<ServiceNowEntryJournalDTO> changes;
+        private List<ServiceNowDataEntryItem> changes;
     }
 }
