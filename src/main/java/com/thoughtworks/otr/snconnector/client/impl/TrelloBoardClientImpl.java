@@ -11,7 +11,7 @@ import com.thoughtworks.otr.snconnector.client.TrelloClient;
 import com.thoughtworks.otr.snconnector.configuration.TrelloConfiguration;
 import com.thoughtworks.otr.snconnector.constans.TrelloUrlConstant;
 import com.thoughtworks.otr.snconnector.dto.CustomField;
-import com.thoughtworks.otr.snconnector.dto.TrelloCardListDTO;
+import com.thoughtworks.otr.snconnector.dto.TrelloListCard;
 import com.thoughtworks.otr.snconnector.exception.TrelloException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
@@ -74,8 +74,8 @@ public class TrelloBoardClientImpl extends TrelloClient implements TrelloBoardCl
                             .buildAndExpand(boardId)
                             .toUri();
 
-        TrelloCardListDTO trelloCardListDTO = super.getRestTemplate().postForObject(fullUri, null, TrelloCardListDTO.class);
-        return Optional.ofNullable(trelloCardListDTO)
+        TrelloListCard trelloListCard = super.getRestTemplate().postForObject(fullUri, null, TrelloListCard.class);
+        return Optional.ofNullable(trelloListCard)
                        .orElseThrow(() ->  new TrelloException("create trello board failed!"))
                        .getId();
     }

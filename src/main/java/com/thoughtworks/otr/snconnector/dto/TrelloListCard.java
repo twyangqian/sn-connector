@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrelloCardListDTO {
+public class TrelloListCard {
     private String id;
     private String name;
 }
