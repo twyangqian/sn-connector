@@ -60,7 +60,7 @@ public class TrelloService {
         String trelloListCardId = getOrCreateTODOTrelloListCard(createTrelloCardDTO.getTrelloBoardId(), trelloListCards);
         log.info("TODO trello list card id is {}", trelloListCardId);
 
-        TrelloCard trelloCard = getOrCreateTrelloCard(createTrelloCardDTO, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
+        TrelloCard trelloCard = getOrCreateTrelloCard(createTrelloCardDTO, ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
         log.info("get trello card actions");
         Map<String, TrelloAction> trelloActionMap = trelloCardClient.getCardActions(trelloCard.getId())
@@ -144,9 +144,9 @@ public class TrelloService {
                                 .collect(Collectors.toMap(CustomField::getName, Function.identity()));
     }
 
-    private TrelloCard getOrCreateTrelloCard(CreateTrelloCardDTO createTrelloCardDTO, String newTrelloCardName, String newTrelloCardDesc, String trelloListCardId) {
+    private TrelloCard getOrCreateTrelloCard(CreateTrelloCardDTO createTrelloCardDTO, String ticketNumber, String newTrelloCardName, String newTrelloCardDesc, String trelloListCardId) {
         TrelloCard trelloCard;
-        TrelloCard oldTrelloCard = getBoardOldCard(newTrelloCardName, createTrelloCardDTO.getTrelloBoardId());
+        TrelloCard oldTrelloCard = getBoardOldCard(ticketNumber, createTrelloCardDTO.getTrelloBoardId());
 
         if (Objects.nonNull(oldTrelloCard)) {
             trelloCard = oldTrelloCard;
@@ -161,10 +161,10 @@ public class TrelloService {
         return trelloCard;
     }
 
-    private TrelloCard getBoardOldCard(String newTrelloCardName, String boardId) {
+    private TrelloCard getBoardOldCard(String ticketNumber, String boardId) {
         return trelloBoardClient.getBoardCards(boardId)
                         .stream()
-                        .filter(card -> card.getName().equals(newTrelloCardName))
+                        .filter(card -> card.getName().contains(ticketNumber))
                         .findFirst()
                         .map(TRELLO_CARD_MAPPER::toTrelloCard)
                         .orElse(null);
