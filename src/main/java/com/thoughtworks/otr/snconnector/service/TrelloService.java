@@ -4,9 +4,9 @@ import com.julienvey.trello.domain.TList;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloBoardClientImpl;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloCardClientImpl;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloListCardClientImpl;
-import com.thoughtworks.otr.snconnector.dto.CreateTrelloCardDTO;
 import com.thoughtworks.otr.snconnector.dto.CustomField;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
+import com.thoughtworks.otr.snconnector.dto.ServiceNowDTO;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowEntryDTO;
 import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +37,8 @@ public class TrelloService {
     private final TrelloListCardClientImpl trelloListCardClient;
     private final TrelloCardClientImpl trelloCardClient;
 
-    public TrelloCard createTrelloCard(String boardId, CreateTrelloCardDTO createTrelloCardDTO) {
-        List<ServiceNowEntryDTO> serviceNowEntryDTOS = createTrelloCardDTO.getServiceNowData().getEntries()
+    public TrelloCard createTrelloCard(String boardId, ServiceNowDTO serviceNowDTO) {
+        List<ServiceNowEntryDTO> serviceNowEntryDTOS = serviceNowDTO.getEntries()
                                                               .stream()
                                                               .sorted(Comparator.comparing(ServiceNowEntryDTO::getSysCreatedOnAdjusted))
                                                               .collect(Collectors.toList());

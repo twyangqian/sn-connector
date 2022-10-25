@@ -1,6 +1,6 @@
 package com.thoughtworks.otr.snconnector.controller;
 
-import com.thoughtworks.otr.snconnector.dto.CreateTrelloCardDTO;
+import com.thoughtworks.otr.snconnector.dto.ServiceNowDTO;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
 import com.thoughtworks.otr.snconnector.service.TrelloService;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class TrelloController {
     @PostMapping("/cards")
     public ResponseEntity<TrelloCard> createTrelloCard(
             @RequestParam(name = "boardId") @NotBlank String boardId,
-            @RequestBody CreateTrelloCardDTO createTrelloCardDTO) {
-        return ResponseEntity.ok(trelloService.createTrelloCard(boardId, createTrelloCardDTO));
+            @RequestBody ServiceNowDTO serviceNowDTO) {
+        return ResponseEntity.ok(trelloService.createTrelloCard(boardId, serviceNowDTO));
     }
 }
