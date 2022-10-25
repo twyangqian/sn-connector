@@ -71,16 +71,27 @@ public class TrelloService {
 
         log.info("get trello board custom field");
         Map<String, CustomField> customFieldMap = buildBoardCustomFieldMap(boardId);
+
+        log.info("build trello card custom field item");
         Map<String, CustomFieldItem> cardCustomFiledItemMap =
                 customFieldMap.entrySet()
                               .stream()
                               .map(customField -> buildCustomFieldItem(ticketNumber, ticketOpenDate, customField))
                               .collect(Collectors.toMap(CustomFieldItem::getIdCustomField, Function.identity()));
 
+        log.info("get remote trello card custom field items");
+        Map<String, CustomFieldItem> remoteCardCustomFieldItemsMap = trelloCardClient.getCardCustomFieldItems(trelloCard.getId())
+                                                               .stream()
+                                                               .collect(
+                                                                       Collectors.toMap(
+                                                                               customFieldItem ->
+                                                                                       customFieldItem.getIdCustomField() +
+                                                                                               customFieldItem.getValue().values().stream().reduce(String::concat),
+                                                                               Function.identity()));
 
         log.info("create trello card custom field item and comments");
         serviceNowDataEntries.forEach(entry -> {
-            createTrelloCardCustomFieldItem(customFieldMap, cardCustomFiledItemMap, entry, trelloCard);
+            createTrelloCardCustomFieldItem(customFieldMap, cardCustomFiledItemMap, entry, trelloCard, remoteCardCustomFieldItemsMap);
             createTrelloCardComments(trelloCard, trelloActionMap, entry);
         });
 
@@ -106,7 +117,8 @@ public class TrelloService {
     private void createTrelloCardCustomFieldItem(Map<String, CustomField> customFieldMap,
                                                  Map<String, CustomFieldItem> cardCustomFiledItemMap,
                                                  ServiceNowDataEntry entry,
-                                                 TrelloCard trelloCard) {
+                                                 TrelloCard trelloCard,
+                                                 Map<String, CustomFieldItem> remoteCardCustomFieldItemsMap) {
         entry.getEntries().getChanges().forEach(change -> {
                     CustomField customField = customFieldMap.get(change.getFieldName().getTrelloFieldName());
                     if (Objects.nonNull(customField)) {
@@ -115,13 +127,21 @@ public class TrelloService {
                     }
                 });
         cardCustomFiledItemMap.values().forEach(customFieldItem -> {
-                    if (Objects.nonNull(customFieldItem.getValue())) {
+                    if (Objects.nonNull(customFieldItem.getValue()) &&
+                            customFieldItemValueChanges(customFieldItem, remoteCardCustomFieldItemsMap)) {
                         trelloCardClient.updateCardCustomFieldItem(
                                 trelloCard.getId(), customFieldItem.getIdCustomField(), customFieldItem);
                         trelloCard.getCustomFieldItems().add(customFieldItem);
                     }
                 }
         );
+    }
+
+    private boolean customFieldItemValueChanges(CustomFieldItem customFieldItem,
+                                                Map<String, CustomFieldItem> remoteCardCustomFieldItemsMap) {
+        return !remoteCardCustomFieldItemsMap.containsKey(
+                customFieldItem.getIdCustomField() +
+                customFieldItem.getValue().values().stream().reduce(String::concat));
     }
 
     private CustomFieldItem buildCustomFieldItem(String ticket, String ticketOpenDate, Map.Entry<String, CustomField> customField) {
