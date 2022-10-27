@@ -62,8 +62,9 @@ public class TrelloService {
         TrelloCard trelloCard = getOrCreateTrelloCard(boardId, ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
         log.info("get trello card actions");
-        Map<String, TrelloAction> trelloActionMap = trelloCardClient.getCardActions(trelloCard.getId())
+        Map<String, TrelloAction> trelloCardCommentsMap = trelloCardClient.getCardActions(trelloCard.getId())
                                                             .stream()
+                                                            .filter(action -> action.getType().equals("commentCard"))
                                                             .collect(
                                                                     Collectors.toMap(
                                                                             trelloAction -> trelloAction.getData().getText(),
@@ -93,7 +94,7 @@ public class TrelloService {
         log.info("create trello card custom field item and comments");
         serviceNowDataEntries.forEach(entry -> {
             buildTrelloCardCustomFieldItem(customFieldMap, cardCustomFiledItemMap, entry);
-            createTrelloCardComments(trelloCard, trelloActionMap, entry);
+            createTrelloCardComments(trelloCard, trelloCardCommentsMap, entry);
         });
 
         createTrelloCardCustomFieldItem(cardCustomFiledItemMap, trelloCard, remoteCardCustomFieldItemsMap);
