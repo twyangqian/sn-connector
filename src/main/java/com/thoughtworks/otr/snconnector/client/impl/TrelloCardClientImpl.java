@@ -69,4 +69,9 @@ public class TrelloCardClientImpl extends TrelloClient implements TrelloCardClie
     public void createCardComment(String cardId, String commentText) {
         super.getTrelloApi().addCommentToCard(cardId, commentText);
     }
+
+    @Override
+    public void updateCard(TrelloCard card) {
+        super.getTrelloApi().updateCard(card);
+    }
 }
