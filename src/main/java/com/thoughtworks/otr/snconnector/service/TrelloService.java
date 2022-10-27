@@ -114,6 +114,16 @@ public class TrelloService {
     }
 
     private void updateTrelloCardDueDateWithSLA(TrelloCard trelloCard) {
+        AtomicReference<Duration> ticketProcessTime = getTicketProcessTime(trelloCard);
+        Date ticketDueDate = DateUtils.localDateTimeToDate(
+                DateUtils.dateToLocalDateTime(new Date()).plus(Duration.ofHours(32).minus(ticketProcessTime.get())));
+        if (trelloCard.getDue().compareTo((ticketDueDate)) != 0) {
+            trelloCard.setDue(ticketDueDate);
+            trelloCardClient.updateCard(trelloCard);
+        }
+    }
+
+    private AtomicReference<Duration> getTicketProcessTime(TrelloCard trelloCard) {
         AtomicReference<Duration> ticketProcessTime = new AtomicReference<>(Duration.ZERO);
         AtomicReference<ServiceNowDataStatusChange> previousStatusChange = new AtomicReference<>(
                 trelloCard.getServiceNowDataStatusChanges()
@@ -130,13 +140,7 @@ public class TrelloService {
                     previousStatusChange.set(currentStatusChange);
                 }
         );
-
-        Date ticketDueDate = DateUtils.localDateTimeToDate(
-                DateUtils.dateToLocalDateTime(new Date()).plus(Duration.ofHours(32).minus(ticketProcessTime.get())));
-        if (trelloCard.getDue().compareTo((ticketDueDate)) != 0) {
-            trelloCard.setDue(ticketDueDate);
-            trelloCardClient.updateCard(trelloCard);
-        }
+        return ticketProcessTime;
     }
 
     private void buildServiceNowStatusChanges(ServiceNowDataEntry entry, TrelloCard trelloCard) {
