@@ -22,6 +22,9 @@ public class ServiceNowDataEntry {
     @JsonProperty("short_description")
     private String shortDescription;
 
+    @JsonProperty("document_id")
+    private String documentId;
+
     @JsonProperty("sys_created_on_adjusted")
     private String sysCreatedOnAdjusted;
 

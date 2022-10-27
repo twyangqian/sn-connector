@@ -32,6 +32,8 @@ import static com.thoughtworks.otr.snconnector.utils.mapper.TrelloCardMapper.TRE
 public class TrelloService {
 
     private static final String DEFAULT_TRELLO_CARD_LIST_NAME = "TODO";
+    private static final String SERVICE_NOW_LINK_TEMPLATE =
+            "https://digitalservices.mercedes-benz.com/nav_to.do?uri=sn_customerservice_case.do?sys_id=%s";
 
     private final TrelloBoardClientImpl trelloBoardClient;
     private final TrelloListCardClientImpl trelloListCardClient;
@@ -43,15 +45,15 @@ public class TrelloService {
                                                                         .sorted(Comparator.comparing(ServiceNowDataEntry::getSysCreatedOnAdjusted))
                                                                         .collect(Collectors.toList());
 
-        Optional<ServiceNowDataEntry> earliestServiceNowEntry = serviceNowDataEntries.stream().findFirst();
-        if (earliestServiceNowEntry.isEmpty()) {
+        ServiceNowDataEntry earliestServiceNowEntry = serviceNowDataEntries.stream().findFirst().orElse(null);
+        if (Objects.isNull(earliestServiceNowEntry)) {
             throw new TrelloException("no data in service now request body");
         }
 
-        String ticketNumber = earliestServiceNowEntry.get().getDisplayValue();
-        String ticketOpenDate = earliestServiceNowEntry.get().getSysCreatedOnAdjusted();
-        String newTrelloCardName = ticketNumber + " " + earliestServiceNowEntry.get().getShortDescription();
-        String newTrelloCardDesc = earliestServiceNowEntry.get().getShortDescription();
+        String ticketNumber = earliestServiceNowEntry.getDisplayValue();
+        String ticketOpenDate = earliestServiceNowEntry.getSysCreatedOnAdjusted();
+        String newTrelloCardName = ticketNumber + " " + earliestServiceNowEntry.getShortDescription();
+        String newTrelloCardDesc = earliestServiceNowEntry.getShortDescription() + "\n" + buildServiceNowLink(earliestServiceNowEntry.getDocumentId());
 
         log.info("ticket number: {}, ticket open date: {}, trello card name: {}", ticketNumber, ticketOpenDate, newTrelloCardName);
 
@@ -100,6 +102,10 @@ public class TrelloService {
         createTrelloCardCustomFieldItem(cardCustomFiledItemMap, trelloCard, remoteCardCustomFieldItemsMap);
 
         return trelloCard;
+    }
+
+    private String buildServiceNowLink(String documentId) {
+        return String.format(SERVICE_NOW_LINK_TEMPLATE, documentId);
     }
 
 
