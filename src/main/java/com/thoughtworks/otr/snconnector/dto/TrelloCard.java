@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Builder
@@ -21,6 +22,7 @@ public class TrelloCard extends Card {
     private String name;
     private String idList;
     private String desc;
+    private Date due;
     private List<String> idMembers;
     private List<Label> labels;
 
