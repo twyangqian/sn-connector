@@ -8,19 +8,25 @@ import com.thoughtworks.otr.snconnector.dto.CustomField;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowData;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowDataEntry;
+import com.thoughtworks.otr.snconnector.dto.ServiceNowDataStatusChange;
 import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardComment;
+import com.thoughtworks.otr.snconnector.enums.ServiceNowEntryFieldName;
+import com.thoughtworks.otr.snconnector.enums.ServiceNowStatus;
 import com.thoughtworks.otr.snconnector.exception.TrelloException;
+import com.thoughtworks.otr.snconnector.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -97,11 +103,51 @@ public class TrelloService {
         serviceNowDataEntries.forEach(entry -> {
             buildTrelloCardCustomFieldItem(customFieldMap, cardCustomFiledItemMap, entry);
             createTrelloCardComments(trelloCard, trelloCardCommentsMap, entry);
+            buildServiceNowStatusChanges(entry, trelloCard);
         });
 
         createTrelloCardCustomFieldItem(cardCustomFiledItemMap, trelloCard, remoteCardCustomFieldItemsMap);
 
+        updateTrelloCardDueDateWithSLA(trelloCard);
+
         return trelloCard;
+    }
+
+    private void updateTrelloCardDueDateWithSLA(TrelloCard trelloCard) {
+        AtomicReference<Duration> ticketProcessTime = new AtomicReference<>(Duration.ZERO);
+        AtomicReference<ServiceNowDataStatusChange> previousStatusChange = new AtomicReference<>(
+                trelloCard.getServiceNowDataStatusChanges()
+                          .stream()
+                          .findFirst()
+                          .orElse(null));
+        trelloCard.getServiceNowDataStatusChanges().forEach(
+                currentStatusChange -> {
+                    if (!previousStatusChange.get().getStatus().equals(ServiceNowStatus.AWAITING_INFO)) {
+                        ticketProcessTime.set(ticketProcessTime.get().plus(DateUtils.betweenDurationInWorkDays(
+                                DateUtils.stringToLocalDateTime(previousStatusChange.get().getStatusChangeData()),
+                                DateUtils.stringToLocalDateTime(currentStatusChange.getStatusChangeData()))));
+                    }
+                    previousStatusChange.set(currentStatusChange);
+                }
+        );
+
+        Date ticketDueDate = DateUtils.localDateTimeToDate(
+                DateUtils.dateToLocalDateTime(new Date()).plus(Duration.ofHours(32).minus(ticketProcessTime.get())));
+        if (trelloCard.getDue().compareTo((ticketDueDate)) != 0) {
+            trelloCard.setDue(ticketDueDate);
+            trelloCardClient.updateCard(trelloCard);
+        }
+    }
+
+    private void buildServiceNowStatusChanges(ServiceNowDataEntry entry, TrelloCard trelloCard) {
+        entry.getEntries().getChanges().stream()
+                .filter(change -> change.getFieldName().equals(ServiceNowEntryFieldName.STATE))
+                .forEach(change -> trelloCard.getServiceNowDataStatusChanges().add(
+                        ServiceNowDataStatusChange.builder()
+                                                  .status(ServiceNowStatus.getServiceNowStatus(change.getNewValue()))
+                                                  .statusChangeData(entry.getSysCreatedOnAdjusted())
+                                                  .build()
+                ));
     }
 
     private String buildServiceNowLink(String documentId) {
