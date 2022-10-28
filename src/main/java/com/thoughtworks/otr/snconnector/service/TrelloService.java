@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -116,7 +117,7 @@ public class TrelloService {
     private void updateTrelloCardDueDateWithSLA(TrelloCard trelloCard) {
         AtomicReference<Duration> ticketProcessTime = getTicketProcessTime(trelloCard);
         Date ticketDueDate = DateUtils.localDateTimeToDate(
-                DateUtils.dateToLocalDateTime(new Date()).plus(Duration.ofHours(32).minus(ticketProcessTime.get())));
+                LocalDateTime.now().plus(Duration.ofHours(85).plus(Duration.ofMinutes(20)).minus(ticketProcessTime.get())));
         if (Objects.isNull(trelloCard.getDue()) || trelloCard.getDue().compareTo((ticketDueDate)) != 0) {
             trelloCard.setDue(ticketDueDate);
             trelloCardClient.updateCard(trelloCard);
@@ -140,6 +141,11 @@ public class TrelloService {
                     previousStatusChange.set(currentStatusChange);
                 }
         );
+        if (previousStatusChange.get().getStatus().equals(ServiceNowStatus.OPEN)) {
+            ticketProcessTime.set(ticketProcessTime.get().plus(DateUtils.betweenDurationInWorkDays(
+                    DateUtils.stringToLocalDateTime(previousStatusChange.get().getStatusChangeData()),
+                    LocalDateTime.now())));
+        }
         return ticketProcessTime;
     }
 
