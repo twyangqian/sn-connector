@@ -117,7 +117,7 @@ public class TrelloService {
         AtomicReference<Duration> ticketProcessTime = getTicketProcessTime(trelloCard);
         Date ticketDueDate = DateUtils.localDateTimeToDate(
                 DateUtils.dateToLocalDateTime(new Date()).plus(Duration.ofHours(32).minus(ticketProcessTime.get())));
-        if (trelloCard.getDue().compareTo((ticketDueDate)) != 0) {
+        if (Objects.isNull(trelloCard.getDue()) || trelloCard.getDue().compareTo((ticketDueDate)) != 0) {
             trelloCard.setDue(ticketDueDate);
             trelloCardClient.updateCard(trelloCard);
         }
