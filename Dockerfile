@@ -1,5 +1,7 @@
 FROM openjdk:11
 
-ADD build/libs/sn-connector.jar sn-connector.jar
+RUN mkdir /app
 
-ENTRYPOINT ["java", "-jar", "/sn-connector.jar"]
+ADD build/libs/sn-connector.jar /app/sn-connector.jar
+
+ENTRYPOINT ["java", "-jar", "/app/sn-connector.jar"]
