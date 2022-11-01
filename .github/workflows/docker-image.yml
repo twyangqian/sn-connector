@@ -2,7 +2,6 @@ name: Deploy with docker
 
 on:
   push:
-    # 分支
     branches: [ master ]
   pull_request:
     branches: [ master ]
@@ -20,10 +19,8 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      #更改脚本权限
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      # 编译打包 -x test 跳过测试      
+        run: chmod +x gradlew 
       - name: Build with Gradle 
         run: ./gradlew bootWar -x test
       - name: Build the Docker image
