@@ -5,8 +5,12 @@ plugins {
 }
 
 group = 'com.thoughtworks.otr'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+
+bootJar {
+	archiveFileName = "sn-connector.jar"
+	archiveVersion = "${projectVersion}"
+}
 
 configurations {
 	compileOnly {
