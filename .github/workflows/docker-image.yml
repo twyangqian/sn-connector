@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: set up JDK11
-        uses: action/setup-java@v3
+        uses: action/setup-java@v2
         with:
           java-version: '11'
           distribution: 'adopt'
