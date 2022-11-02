@@ -48,11 +48,6 @@ jobs:
         run: echo $a*
       - name: echo files
         run: bash output_dir_file.sh
-      - name: upload jar
-        uses: actions/upload-artifact@v1
-        with:
-          name: sn-connector
-          path: build/libs/
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login
@@ -61,18 +56,13 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.repository_owner }}
           password: ${{ secrets.PACKAGES_TOKEN }}
-      - name: download jar
-        uses: actions/download-artifact@v1
-        with:
-          name: sn-connector
-          path: build/libs/
       - name: echo files1
         run: bash output_dir_file.sh
       - uses: actions/checkout@v2
       - name: Build && Push
         uses: docker/build-push-action@v3
         with:
-          context: ./
+          context: .
           file: ./Dockerfile
           push: true
           tags: |
