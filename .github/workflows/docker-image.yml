@@ -43,7 +43,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build
       - name: copy jar
-        uses: actions/checkout@v2
         run: echo $a*
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
