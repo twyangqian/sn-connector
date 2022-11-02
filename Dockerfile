@@ -2,16 +2,8 @@ FROM openjdk:11
 
 RUN mkdir /app
 
-ARG JAR_FILE="sn-connector.jar"
+COPY Dockerfile /app/Dockerfile
 
-RUN apk add gradle
-
-COPY . /app/
-
-WORKDIR /app
-
-RUN ./gradlew clean build
-
-RUN cp build/libs/${JAR_FILE} /app/${JAR_FILE}
+COPY build/libs/sn-connector.jar /app/sn-connector.jar
 
 ENTRYPOINT ["java", "-jar", "/app/sn-connector.jar"]
