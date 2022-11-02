@@ -2,6 +2,8 @@ FROM openjdk:11
 
 RUN mkdir /app
 
-COPY ./build/libs/**.jar /app/sn-connector.jar
+COPY Dockerfile /app/Dockerfile
+
+COPY build/libs/**.jar /app/sn-connector.jar
 
 ENTRYPOINT ["java", "-jar", "/app/sn-connector.jar"]
