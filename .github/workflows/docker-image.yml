@@ -58,8 +58,8 @@ jobs:
       - name: Build && Push
         uses: docker/build-push-action@v2
         with:
-          context: sn-connector/
-          file: sn-connector/Dockerfile
+          context: /
+          file: /Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ needs.get-tags.outputs.tags }}
