@@ -42,14 +42,10 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew clean build
-      - name: create dir app
-        run: mkdir /app
       - name: get pwd
         run: echo `pwd`
       - name: echo dir
         run: echo $a*
-      - name: copy jar
-        run: copy /build/libs/sn-connector.jar /app/sn-connector.jar
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
         with:
