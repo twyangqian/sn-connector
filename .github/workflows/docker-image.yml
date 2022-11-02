@@ -60,7 +60,7 @@ jobs:
       - name: Build && Push
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: /home/runner/work/sn-connector/sn-connector
           file: ./Dockerfile
           push: true
           tags: |
