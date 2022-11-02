@@ -62,7 +62,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.PACKAGES_TOKEN }}
       - name: download jar
-      - uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v1
         with:
           name: sn-connector
           path: build/libs/
