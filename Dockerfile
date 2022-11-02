@@ -4,6 +4,6 @@ RUN mkdir /app
 
 COPY Dockerfile /app/Dockerfile
 
-COPY build/libs/sn-connector.jar /app/sn-connector.jar
+COPY build/libs/**.jar /app/sn-connector.jar
 
 ENTRYPOINT ["java", "-jar", "/app/sn-connector.jar"]
