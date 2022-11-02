@@ -15,6 +15,12 @@ jobs:
       TZ: Asia/Shanghai
       REGISTRY: ghcr.io
     steps:
+      - uses: actions/checkout@v2
+      - name: set up JDK11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login
@@ -23,8 +29,6 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.repository_owner }}
           password: ${{ secrets.PACKAGES_TOKEN }}
-      - name: echo files1
-        run: bash output_dir_file.sh
       - uses: actions/checkout@v2
       - name: Build && Push
         uses: docker/build-push-action@v3
