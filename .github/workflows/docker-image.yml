@@ -72,7 +72,7 @@ jobs:
       - name: Build && Push
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./
           file: ./Dockerfile
           push: true
           tags: |
