@@ -59,4 +59,10 @@ jobs:
           password: ${{ secrets.PACKAGES_TOKEN }}
       - name: Build && Push
         uses: docker/build-push-action@v3
-        run: docker build -t sn-connector:v0.1 -f ./Dockerfile .
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ needs.get-tags.outputs.tags }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest            
