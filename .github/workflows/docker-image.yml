@@ -63,9 +63,9 @@ jobs:
           password: ${{ secrets.PACKAGES_TOKEN }}
       - name: download jar
       - uses: actions/download-artifact@v1
-          with:
-            name: sn-connector
-            path: build/libs/
+        with:
+          name: sn-connector
+          path: build/libs/
       - name: echo files1
         run: bash output_dir_file.sh
       - uses: actions/checkout@v2
