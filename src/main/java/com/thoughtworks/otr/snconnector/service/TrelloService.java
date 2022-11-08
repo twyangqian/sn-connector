@@ -60,7 +60,7 @@ public class TrelloService {
         String ticketNumber = earliestServiceNowEntry.getDisplayValue();
         String ticketOpenDate = earliestServiceNowEntry.getSysCreatedOnAdjusted();
         String newTrelloCardName = ticketNumber + " " + earliestServiceNowEntry.getShortDescription();
-        String newTrelloCardDesc = earliestServiceNowEntry.getShortDescription() + "\n" + buildServiceNowLink(earliestServiceNowEntry.getDocumentId());
+        String newTrelloCardDesc = serviceNowData.getTicketFullDescription() + "\n" + buildServiceNowLink(earliestServiceNowEntry.getDocumentId());
 
         log.info("ticket number: {}, ticket open date: {}, trello card name: {}", ticketNumber, ticketOpenDate, newTrelloCardName);
 
@@ -86,7 +86,7 @@ public class TrelloService {
         Map<String, CustomFieldItem> cardCustomFiledItemMap =
                 customFieldMap.entrySet()
                               .stream()
-                              .map(customField -> buildCustomFieldItem(ticketNumber, ticketOpenDate, customField))
+                              .map(customField -> buildCustomFieldItem(ticketNumber, ticketOpenDate, serviceNowData.getContactUserD8Account(), customField))
                               .collect(Collectors.toMap(CustomFieldItem::getIdCustomField, Function.identity()));
 
         log.info("get remote trello card custom field items");
@@ -217,15 +217,23 @@ public class TrelloService {
                                                                     .orElse(null));
     }
 
-    private CustomFieldItem buildCustomFieldItem(String ticket, String ticketOpenDate, Map.Entry<String, CustomField> customField) {
+    private CustomFieldItem buildCustomFieldItem(String ticket, String ticketOpenDate, String contactUserD8account, Map.Entry<String, CustomField> customField) {
         CustomFieldItem customFieldItem = CustomFieldItem.builder()
                                               .idCustomField(customField.getValue().getId())
                                               .ModelType("card")
                                               .build();
-        if (customField.getKey().equals("ticket")) {
-            customFieldItem.setValue(Map.of(customField.getValue().getType(), ticket));
-        } else if (customField.getKey().equals("ticket开启时间")) {
-            customFieldItem.setValue(Map.of(customField.getValue().getType(), ticketOpenDate));
+        switch (customField.getKey()) {
+            case "ticket":
+                customFieldItem.setValue(Map.of(customField.getValue().getType(), ticket));
+                break;
+            case "ticket开启时间":
+                customFieldItem.setValue(Map.of(customField.getValue().getType(), ticketOpenDate));
+                break;
+            case "联系人":
+                customFieldItem.setValue(Map.of(customField.getValue().getType(), contactUserD8account));
+                break;
+            default:
+                break;
         }
         return customFieldItem;
     }

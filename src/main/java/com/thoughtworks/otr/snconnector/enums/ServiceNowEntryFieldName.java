@@ -9,7 +9,7 @@ import java.util.Arrays;
 @Getter
 public enum ServiceNowEntryFieldName {
     COMMENTS("补充备注", "comments"),
-    OPENED_BY("提交人", "联系人"),
+    OPENED_BY("提交人", ""),
     IMPACT("影响", ""),
     STATE("状态", "Status"),
     PRIORITY("优先级", "Priority"),

@@ -15,6 +15,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServiceNowData {
+
+    @NotBlank
+    private String ticketFullDescription;
+
+    @NotBlank
+    private String contactUserD8Account;
+
     @NotBlank
     private List<ServiceNowDataEntry> entries;
 }
