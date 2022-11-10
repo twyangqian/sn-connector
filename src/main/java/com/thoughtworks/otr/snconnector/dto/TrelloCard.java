@@ -33,5 +33,8 @@ public class TrelloCard extends Card {
     private List<TrelloCardComment> trelloCardComments = new ArrayList<>();
 
     @Builder.Default
+    private List<TrelloCardCheckList> checkLists = new ArrayList<>();
+
+    @Builder.Default
     private List<ServiceNowDataStatusChange> serviceNowDataStatusChanges = new ArrayList<>();
 }

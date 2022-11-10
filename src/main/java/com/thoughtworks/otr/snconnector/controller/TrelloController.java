@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Controller
 @AllArgsConstructor
@@ -26,7 +27,8 @@ public class TrelloController {
     public ResponseEntity<TrelloCard> createTrelloCard(
             @RequestParam(name = "boardId") @NotBlank String boardId,
             @RequestParam(name = "defaultListCard", defaultValue = "TODO") String defaultListCard,
+            @RequestParam(name = "checkLists") List<String> checkLists,
             @RequestBody ServiceNowData serviceNowData) {
-        return ResponseEntity.ok(trelloService.createTrelloCard(boardId, defaultListCard, serviceNowData));
+        return ResponseEntity.ok(trelloService.createTrelloCard(boardId, defaultListCard, checkLists, serviceNowData));
     }
 }

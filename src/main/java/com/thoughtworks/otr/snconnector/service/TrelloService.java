@@ -1,5 +1,6 @@
 package com.thoughtworks.otr.snconnector.service;
 
+import com.julienvey.trello.domain.CheckList;
 import com.julienvey.trello.domain.TList;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloBoardClientImpl;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloCardClientImpl;
@@ -11,6 +12,7 @@ import com.thoughtworks.otr.snconnector.dto.ServiceNowDataEntry;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowDataStatusChange;
 import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
+import com.thoughtworks.otr.snconnector.dto.TrelloCardCheckList;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardComment;
 import com.thoughtworks.otr.snconnector.enums.ServiceNowEntryFieldName;
 import com.thoughtworks.otr.snconnector.enums.ServiceNowStatus;
@@ -45,7 +47,7 @@ public class TrelloService {
     private final TrelloListCardClientImpl trelloListCardClient;
     private final TrelloCardClientImpl trelloCardClient;
 
-    public TrelloCard createTrelloCard(String boardId, String defaultListCard, ServiceNowData serviceNowData) {
+    public TrelloCard createTrelloCard(String boardId, String defaultListCard, List<String> checkLists, ServiceNowData serviceNowData) {
         List<ServiceNowDataEntry> serviceNowDataEntries = serviceNowData.getEntries()
                                                                         .stream()
                                                                         .sorted(Comparator.comparing(ServiceNowDataEntry::getSysCreatedOnAdjusted))
@@ -68,6 +70,8 @@ public class TrelloService {
         log.info("TODO trello list card id is {}", trelloListCardId);
 
         TrelloCard trelloCard = getOrCreateTrelloCard(boardId, ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
+
+        createTrelloCardChecklists(trelloCard, checkLists);
 
         log.info("get trello card actions");
         Map<String, TrelloAction> trelloCardCommentsMap = trelloCardClient.getCardActions(trelloCard.getId())
@@ -111,6 +115,25 @@ public class TrelloService {
         updateTrelloCardDueDateWithSLA(trelloCard);
 
         return trelloCard;
+    }
+
+    private void createTrelloCardChecklists(TrelloCard trelloCard, List<String> checkLists) {
+       List<String> remoteTrelloCardCheckList = trelloCardClient.getCardCheckLists(trelloCard.getId())
+                                                                .stream()
+                                                                .map(CheckList::getName)
+                                                                .collect(Collectors.toList());
+
+        checkLists.stream()
+                .filter(checkListName -> !remoteTrelloCardCheckList.contains(checkListName))
+                .forEach(checkListName -> {
+                    TrelloCardCheckList trelloCardCheckList = trelloCardClient.createCardCheckList(
+                            trelloCard.getId(), TrelloCardCheckList.builder()
+                                                                   .idCard(trelloCard.getId())
+                                                                   .name(checkListName)
+                                                                   .build());
+                    trelloCard.getCheckLists().add(trelloCardCheckList);
+                });
+
     }
 
     private void updateTrelloCardDueDateWithSLA(TrelloCard trelloCard) {

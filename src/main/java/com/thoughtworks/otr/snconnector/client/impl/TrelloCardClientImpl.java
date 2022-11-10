@@ -8,13 +8,16 @@ import com.thoughtworks.otr.snconnector.constans.TrelloUrlConstant;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
 import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
+import com.thoughtworks.otr.snconnector.dto.TrelloCardCheckList;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import static com.thoughtworks.otr.snconnector.utils.mapper.TrelloCardMapper.TRELLO_CARD_MAPPER;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
@@ -73,5 +76,18 @@ public class TrelloCardClientImpl extends TrelloClient implements TrelloCardClie
     @Override
     public void updateCard(TrelloCard card) {
         super.getTrelloApi().updateCard(card);
+    }
+
+    @Override
+    public List<TrelloCardCheckList> getCardCheckLists(String cardId) {
+        return super.getTrelloApi().getCardChecklists(cardId)
+                .stream()
+                .map(TRELLO_CARD_MAPPER::toTrelloCardCheckList)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public TrelloCardCheckList createCardCheckList(String cardId, TrelloCardCheckList trelloCardCheckList) {
+        return TRELLO_CARD_MAPPER.toTrelloCardCheckList(super.getTrelloApi().createCheckList(cardId, trelloCardCheckList));
     }
 }

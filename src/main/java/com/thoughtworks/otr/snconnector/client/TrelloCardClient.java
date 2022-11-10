@@ -3,6 +3,7 @@ package com.thoughtworks.otr.snconnector.client;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
 import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
+import com.thoughtworks.otr.snconnector.dto.TrelloCardCheckList;
 
 import java.util.List;
 
@@ -13,4 +14,6 @@ public interface TrelloCardClient {
     List<TrelloAction> getCardActions(String cardId);
     void createCardComment(String cardId, String commentText);
     void updateCard(TrelloCard card);
+    List<TrelloCardCheckList> getCardCheckLists(String cardId);
+    TrelloCardCheckList createCardCheckList(String cardId, TrelloCardCheckList trelloCardCheckList);
 }
