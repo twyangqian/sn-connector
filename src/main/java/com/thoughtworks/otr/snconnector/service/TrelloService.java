@@ -38,7 +38,6 @@ import static com.thoughtworks.otr.snconnector.utils.mapper.TrelloCardMapper.TRE
 @Slf4j
 public class TrelloService {
 
-    private static final String DEFAULT_TRELLO_CARD_LIST_NAME = "TODO";
     private static final String SERVICE_NOW_LINK_TEMPLATE =
             "https://digitalservices.mercedes-benz.com/nav_to.do?uri=sn_customerservice_case.do?sys_id=%s";
 
@@ -46,7 +45,7 @@ public class TrelloService {
     private final TrelloListCardClientImpl trelloListCardClient;
     private final TrelloCardClientImpl trelloCardClient;
 
-    public TrelloCard createTrelloCard(String boardId, ServiceNowData serviceNowData) {
+    public TrelloCard createTrelloCard(String boardId, String defaultListCard, ServiceNowData serviceNowData) {
         List<ServiceNowDataEntry> serviceNowDataEntries = serviceNowData.getEntries()
                                                                         .stream()
                                                                         .sorted(Comparator.comparing(ServiceNowDataEntry::getSysCreatedOnAdjusted))
@@ -65,7 +64,7 @@ public class TrelloService {
         log.info("ticket number: {}, ticket open date: {}, trello card name: {}", ticketNumber, ticketOpenDate, newTrelloCardName);
 
         List<TList> trelloListCards = trelloBoardClient.getBoardListCards(boardId);
-        String trelloListCardId = getOrCreateTODOTrelloListCard(boardId, trelloListCards);
+        String trelloListCardId = getOrCreateTODOTrelloListCard(boardId, defaultListCard, trelloListCards);
         log.info("TODO trello list card id is {}", trelloListCardId);
 
         TrelloCard trelloCard = getOrCreateTrelloCard(boardId, ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
@@ -270,11 +269,11 @@ public class TrelloService {
                         .orElse(null);
     }
 
-    private String getOrCreateTODOTrelloListCard(String boardId, List<TList> trelloCardList) {
+    private String getOrCreateTODOTrelloListCard(String boardId, String defaultListCard, List<TList> trelloCardList) {
         return trelloCardList.stream()
-                      .filter(trelloList -> trelloList.getName().equals(DEFAULT_TRELLO_CARD_LIST_NAME))
+                      .filter(trelloList -> trelloList.getName().equals(defaultListCard))
                       .findFirst()
                       .map(TList::getId)
-                      .orElseGet(() -> trelloBoardClient.createBoardListCard(boardId, DEFAULT_TRELLO_CARD_LIST_NAME));
+                      .orElseGet(() -> trelloBoardClient.createBoardListCard(boardId, defaultListCard));
     }
 }

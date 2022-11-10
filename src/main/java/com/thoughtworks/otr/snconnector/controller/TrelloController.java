@@ -25,7 +25,8 @@ public class TrelloController {
     @PostMapping("/cards")
     public ResponseEntity<TrelloCard> createTrelloCard(
             @RequestParam(name = "boardId") @NotBlank String boardId,
+            @RequestParam(name = "defaultListCard", defaultValue = "TODO") String defaultListCard,
             @RequestBody ServiceNowData serviceNowData) {
-        return ResponseEntity.ok(trelloService.createTrelloCard(boardId, serviceNowData));
+        return ResponseEntity.ok(trelloService.createTrelloCard(boardId, defaultListCard, serviceNowData));
     }
 }
