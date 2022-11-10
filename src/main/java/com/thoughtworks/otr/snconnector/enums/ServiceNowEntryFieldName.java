@@ -14,7 +14,7 @@ public enum ServiceNowEntryFieldName {
     STATE("状态", "Status"),
     PRIORITY("优先级", "Priority"),
     WORK_NOTES("工作注解", "workComments"),
-    ASSIGNED_TO("已指派给", "已指派给");
+    ASSIGNED_TO("已指派给", "Assigned to");
 
     final String label;
 

@@ -245,13 +245,13 @@ public class TrelloService {
                                               .ModelType("card")
                                               .build();
         switch (customField.getKey()) {
-            case "ticket":
+            case "Ticket":
                 customFieldItem.setValue(Map.of(customField.getValue().getType(), ticket));
                 break;
-            case "ticket开启时间":
+            case "Ticket open date":
                 customFieldItem.setValue(Map.of(customField.getValue().getType(), ticketOpenDate));
                 break;
-            case "联系人":
+            case "Contact":
                 customFieldItem.setValue(Map.of(customField.getValue().getType(), contactUserD8account));
                 break;
             default:
