@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -122,17 +123,17 @@ public class TrelloService {
                                                                 .stream()
                                                                 .map(CheckList::getName)
                                                                 .collect(Collectors.toList());
-
-        checkLists.stream()
-                .filter(checkListName -> !remoteTrelloCardCheckList.contains(checkListName))
-                .forEach(checkListName -> {
-                    TrelloCardCheckList trelloCardCheckList = trelloCardClient.createCardCheckList(
-                            trelloCard.getId(), TrelloCardCheckList.builder()
+       Collections.reverse(checkLists);
+       checkLists.stream()
+                 .filter(checkListName -> !remoteTrelloCardCheckList.contains(checkListName))
+                 .forEach(checkListName -> {
+                     TrelloCardCheckList trelloCardCheckList = trelloCardClient.createCardCheckList(
+                             trelloCard.getId(), TrelloCardCheckList.builder()
                                                                    .idCard(trelloCard.getId())
                                                                    .name(checkListName)
                                                                    .build());
-                    trelloCard.getCheckLists().add(trelloCardCheckList);
-                });
+                     trelloCard.getCheckLists().add(trelloCardCheckList);
+                 });
 
     }
 
