@@ -1,5 +1,6 @@
 package com.thoughtworks.otr.snconnector.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thoughtworks.otr.snconnector.entity.TrelloConfigCheckList;
 import com.thoughtworks.otr.snconnector.enums.Squad;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,8 @@ import java.util.List;
 @Setter
 @Builder
 public class TrelloConfigDTO {
+
+    @JsonIgnore
     private Long id;
 
     @Enumerated(EnumType.STRING)

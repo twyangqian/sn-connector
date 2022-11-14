@@ -26,9 +26,10 @@ import javax.persistence.Table;
 public class TrelloConfigCheckList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private Long id;
 
-    private String check_list_name;
+    private String checkListName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trello_config_id")

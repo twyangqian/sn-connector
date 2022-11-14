@@ -6,7 +6,7 @@ spring:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
         format_sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/sn-connector?characterEncoding=utf8&characterSetResults=utf8
     username: root
