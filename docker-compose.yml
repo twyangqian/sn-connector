@@ -6,3 +6,20 @@ services:
     restart: always
     ports:
       - "8080:8080"
+    links:
+      - mysql
+    environment:
+      SPRING_MYSQL_URL: jdbc:mysql://mysql:3306/sn-connector?characterEncoding=utf8&characterSetResults=utf8
+      SPRING_MYSQL_ROOT_USERNAME: root
+      SPRING_MYSQL_ROOT_PASSWORD: sn_connector_password
+  mysql:
+    image: mysql
+    container_name: sn-connector-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: sn-connector
+      MYSQL_USER: sn_connector
+      MYSQL_PASS: sn_connector_password
+      MYSQL_ROOT_PASSWORD: sn_connector_password
+    ports:
+      - "3306:3306"

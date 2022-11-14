@@ -8,9 +8,9 @@ spring:
     hibernate:
       ddl-auto: none
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/sn-connector?characterEncoding=utf8&characterSetResults=utf8
-    username: root
-    password: password
+    url: ${SPRING_MYSQL_URL:jdbc:mysql://127.0.0.1:3306/sn-connector?characterEncoding=utf8&characterSetResults=utf8}
+    username: ${SPRING_MYSQL_ROOT_USERNAME:root}
+    password: ${SPRING_MYSQL_ROOT_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   flyway:
     enabled: true
