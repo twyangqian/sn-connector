@@ -37,7 +37,7 @@
     });
 
     const squad = squadEnum.PARTS;
-    const syncTrelloUrl = "http://127.0.0.1:8080/api/sn-connector/trello/cards";
+    const syncTrelloUrl = "http://10.205.129.7:8080/api/sn-connector/trello/cards";
     let contactUserD8Account = null;
 
     function changeButton(button, buttonText, styleCursor, color) {
