@@ -31,11 +31,9 @@ public class TrelloController {
 
     @PostMapping("/cards")
     public ResponseEntity<TrelloCard> createTrelloCard(
-            @RequestParam(name = "boardId") @NotBlank String boardId,
-            @RequestParam(name = "defaultListCard", defaultValue = "TODO") String defaultListCard,
-            @RequestParam(name = "checkLists") List<String> checkLists,
+            @RequestParam("squad") @NotBlank Squad squad,
             @RequestBody ServiceNowData serviceNowData) {
-        return ResponseEntity.ok(trelloService.createTrelloCard(boardId, defaultListCard, checkLists, serviceNowData));
+        return ResponseEntity.ok(trelloService.createTrelloCard(squad, serviceNowData));
     }
 
     @PostMapping("/config")

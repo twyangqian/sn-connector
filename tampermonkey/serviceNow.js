@@ -25,8 +25,19 @@
         'border-color': 'transparent',
         'outline': 0,
     };
-    const trelloBoardId = "o0WysWBU";
-    const syncTrelloUrl = "http://10.205.129.7:8080/api/sn-connector/trello/cards";
+    const squadEnum = Object.freeze({
+        PARTS: "PARTS",
+        RWO: "RWO",
+        SALES: "SALES",
+        ACCOUNTING: "ACCOUNTING",
+        WARRANTY: "WARRANTY",
+        WORKSHOP: "WORKSHOP",
+        OPERATION: "OPERATION",
+        ACCIDENT: "ACCIDENT"
+    });
+
+    const squad = squadEnum.PARTS;
+    const syncTrelloUrl = "http://127.0.0.1:8080/api/sn-connector/trello/cards";
     let contactUserD8Account = null;
 
     function changeButton(button, buttonText, styleCursor, color) {
@@ -39,7 +50,7 @@
         const button = document.getElementById(buttonId);
         changeButton(button, '正在同步中', 'not-allowed', '#ccc');
         const ticketFullDescription = getTicketDescription();
-        const syncDataToTrelloUrl = `${syncTrelloUrl}?boardId=${trelloBoardId}`;
+        const syncDataToTrelloUrl = `${syncTrelloUrl}?squad=${squad}`;
         const request_body = JSON.parse(data);
         request_body['ticketFullDescription'] = ticketFullDescription;
         setTimeout(() => {

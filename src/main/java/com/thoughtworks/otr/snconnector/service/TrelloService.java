@@ -14,9 +14,13 @@ import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardCheckList;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardComment;
+import com.thoughtworks.otr.snconnector.entity.TrelloConfig;
+import com.thoughtworks.otr.snconnector.entity.TrelloConfigCheckList;
 import com.thoughtworks.otr.snconnector.enums.ServiceNowEntryFieldName;
 import com.thoughtworks.otr.snconnector.enums.ServiceNowStatus;
+import com.thoughtworks.otr.snconnector.enums.Squad;
 import com.thoughtworks.otr.snconnector.exception.TrelloException;
+import com.thoughtworks.otr.snconnector.repository.TrelloConfigRepository;
 import com.thoughtworks.otr.snconnector.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,8 +51,9 @@ public class TrelloService {
     private final TrelloBoardClientImpl trelloBoardClient;
     private final TrelloListCardClientImpl trelloListCardClient;
     private final TrelloCardClientImpl trelloCardClient;
+    private final TrelloConfigRepository trelloConfigRepository;
 
-    public TrelloCard createTrelloCard(String boardId, String defaultListCard, List<String> checkLists, ServiceNowData serviceNowData) {
+    public TrelloCard createTrelloCard(Squad squad, ServiceNowData serviceNowData) {
         List<ServiceNowDataEntry> serviceNowDataEntries = serviceNowData.getEntries()
                                                                         .stream()
                                                                         .sorted(Comparator.comparing(ServiceNowDataEntry::getSysCreatedOnAdjusted))
@@ -59,6 +64,10 @@ public class TrelloService {
             throw new TrelloException("no data in service now request body");
         }
 
+        TrelloConfig trelloConfig = trelloConfigRepository.findBySquad(squad)
+                                                          .orElseThrow(() -> new TrelloException(String.format("can not found trello config by %s squad", squad.name())));
+
+
         String ticketNumber = earliestServiceNowEntry.getDisplayValue();
         String ticketOpenDate = earliestServiceNowEntry.getSysCreatedOnAdjusted();
         String newTrelloCardName = ticketNumber + " " + earliestServiceNowEntry.getShortDescription();
@@ -66,13 +75,13 @@ public class TrelloService {
 
         log.info("ticket number: {}, ticket open date: {}, trello card name: {}", ticketNumber, ticketOpenDate, newTrelloCardName);
 
-        List<TList> trelloListCards = trelloBoardClient.getBoardListCards(boardId);
-        String trelloListCardId = getOrCreateTODOTrelloListCard(boardId, defaultListCard, trelloListCards);
+        List<TList> trelloListCards = trelloBoardClient.getBoardListCards(trelloConfig.getTrelloBoardId());
+        String trelloListCardId = getOrCreateTODOTrelloListCard(trelloConfig.getTrelloBoardId(), trelloConfig.getDefaultListCardName(), trelloListCards);
         log.info("TODO trello list card id is {}", trelloListCardId);
 
-        TrelloCard trelloCard = getOrCreateTrelloCard(boardId, ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
+        TrelloCard trelloCard = getOrCreateTrelloCard(trelloConfig.getTrelloBoardId(), ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
-        createTrelloCardChecklists(trelloCard, checkLists);
+        createTrelloCardChecklists(trelloCard, trelloConfig.getTrelloConfigCheckLists());
 
         log.info("get trello card actions");
         Map<String, TrelloAction> trelloCardCommentsMap = trelloCardClient.getCardActions(trelloCard.getId())
@@ -84,7 +93,7 @@ public class TrelloService {
                                                                             Function.identity()));
 
         log.info("get trello board custom field");
-        Map<String, CustomField> customFieldMap = buildBoardCustomFieldMap(boardId);
+        Map<String, CustomField> customFieldMap = buildBoardCustomFieldMap(trelloConfig.getTrelloBoardId());
 
         log.info("build trello card custom field item");
         Map<String, CustomFieldItem> cardCustomFiledItemMap =
@@ -118,19 +127,19 @@ public class TrelloService {
         return trelloCard;
     }
 
-    private void createTrelloCardChecklists(TrelloCard trelloCard, List<String> checkLists) {
+    private void createTrelloCardChecklists(TrelloCard trelloCard, List<TrelloConfigCheckList> checkLists) {
        List<String> remoteTrelloCardCheckList = trelloCardClient.getCardCheckLists(trelloCard.getId())
                                                                 .stream()
                                                                 .map(CheckList::getName)
                                                                 .collect(Collectors.toList());
        Collections.reverse(checkLists);
        checkLists.stream()
-                 .filter(checkListName -> !remoteTrelloCardCheckList.contains(checkListName))
+                 .filter(checkListName -> !remoteTrelloCardCheckList.contains(checkListName.getCheckListName()))
                  .forEach(checkListName -> {
                      TrelloCardCheckList trelloCardCheckList = trelloCardClient.createCardCheckList(
                              trelloCard.getId(), TrelloCardCheckList.builder()
                                                                    .idCard(trelloCard.getId())
-                                                                   .name(checkListName)
+                                                                   .name(checkListName.getCheckListName())
                                                                    .build());
                      trelloCard.getCheckLists().add(trelloCardCheckList);
                  });
