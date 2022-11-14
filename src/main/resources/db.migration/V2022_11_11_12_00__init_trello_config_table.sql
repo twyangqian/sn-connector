@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `trello_config`(
 
 CREATE TABLE IF NOT EXISTS `trello_config_check_list`(
     `id` bigint(10) NOT NULL AUTO_INCREMENT,
-    `check_list_name` varchar(150) NOT NULL,
+    `check_list_name` varchar(500) NOT NULL,
     `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `trello_config_id` bigint(10) NOT NULL,
