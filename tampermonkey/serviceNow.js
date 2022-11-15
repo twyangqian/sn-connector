@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 (function (window) {
+    const localStorage = window.localStorage;
     const responseContents = [];
     const buttonId = 'copy_button_identifier';
     const buttonStyles = {
@@ -24,6 +25,19 @@
         'background-color': '#409eff',
         'border-color': 'transparent',
         'outline': 0,
+        'border-radius': '9px',
+    };
+    const squadSelectId = 'squad_select';
+    const squadSelectStyles = {
+        position: 'fixed',
+        top: '220px',
+        right: '154px',
+        width: '130px',
+        outline: 0,
+        background: '#409eff',
+        color: '#fff',
+        padding: '4px',
+        'border-radius': '9px',
     };
     const squadEnum = Object.freeze({
         PARTS: "PARTS",
@@ -36,7 +50,6 @@
         ACCIDENT: "ACCIDENT"
     });
 
-    const squad = squadEnum.PARTS;
     const syncTrelloUrl = "http://10.205.129.7:8080/api/sn-connector/trello/cards";
     let contactUserD8Account = null;
 
@@ -50,7 +63,9 @@
         const button = document.getElementById(buttonId);
         changeButton(button, '正在同步中', 'not-allowed', '#ccc');
         const ticketFullDescription = getTicketDescription();
-        const syncDataToTrelloUrl = `${syncTrelloUrl}?squad=${squad}`;
+        const currentSelectSquad = getSquadSelectValue();
+        localStorage.setItem('previousSquadSelect', currentSelectSquad);
+        const syncDataToTrelloUrl = `${syncTrelloUrl}?squad=${currentSelectSquad}`;
         const request_body = JSON.parse(data);
         request_body['ticketFullDescription'] = ticketFullDescription;
         setTimeout(() => {
@@ -107,6 +122,10 @@
         
     }
 
+    const getSquadSelectValue = () => {
+        return document.querySelector(".squad_select_class").value;
+    }
+
 
     function createButton(id, styles) {
         const button = document.createElement('button');
@@ -127,8 +146,26 @@
         document.body.appendChild(button);
     }
 
+    const createSquadSelect = () => {
+        const squadSelect = document.createElement('div');
+        const previousSquadSelect = localStorage.getItem('previousSquadSelect');
+        const options = Object.keys(squadEnum).map(squad => {
+            if (squad === previousSquadSelect) {
+                return `<option value =\"${squadEnum[squad]}\" selected>${squad}</option>`
+            }
+            return `<option value =\"${squadEnum[squad]}\">${squad}</option>`
+        }).join('\n');
+        squadSelect.innerHTML = `<select class='squad_select_class' style='width: 120px; height: 26px'>${options}</select>`;
+        squadSelect.setAttribute('id', squadSelectId);
+        Object.keys(squadSelectStyles).forEach(key => {
+            squadSelect.style[key] = squadSelectStyles[key];
+        });
+        document.body.appendChild(squadSelect);
+    }
+
     if (window.location.pathname.endsWith('sn_customerservice_case.do')) {
         createButton(buttonId, buttonStyles);
+        createSquadSelect();
     }
 
     (function (open) {
