@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -17,8 +19,30 @@ public final class DateUtils {
 
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final ZoneId UTC_TIME_ZONE = ZoneId.of("UTC");
+    public static final ZoneId DEFAULT_TIME_ZONE = ZoneId.of("Asia/Shanghai");
+    private static final Integer DATE_STRING_LENGTH = 10;
 
+
+    public static Instant stringToInstant(String value) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        if (value.length() > DATE_STRING_LENGTH) {
+            return LocalDateTime.parse(value, DATE_TIME_FORMATTER)
+                                .atZone(DEFAULT_TIME_ZONE)
+                                .toInstant();
+        }
+        return LocalDate.parse(value, DATE_FORMATTER).atStartOfDay(DEFAULT_TIME_ZONE).toInstant();
+    }
+
+    public static String instantToString(Instant value) {
+        if (Objects.isNull(value)) {
+            return null;
+        }
+        return DATE_TIME_FORMATTER.format(value);
+    }
 
     public static LocalDateTime stringToLocalDateTime(String value) {
         if (StringUtils.isBlank(value)) {
