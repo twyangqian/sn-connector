@@ -14,6 +14,7 @@ import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardCheckList;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardComment;
+import com.thoughtworks.otr.snconnector.entity.ServiceNowSyncData;
 import com.thoughtworks.otr.snconnector.entity.TrelloConfig;
 import com.thoughtworks.otr.snconnector.entity.TrelloConfigCheckList;
 import com.thoughtworks.otr.snconnector.enums.CustomFieldItemName;
@@ -21,6 +22,7 @@ import com.thoughtworks.otr.snconnector.enums.ServiceNowEntryFieldName;
 import com.thoughtworks.otr.snconnector.enums.ServiceNowStatus;
 import com.thoughtworks.otr.snconnector.enums.Squad;
 import com.thoughtworks.otr.snconnector.exception.TrelloException;
+import com.thoughtworks.otr.snconnector.repository.ServiceNowSyncDataRepository;
 import com.thoughtworks.otr.snconnector.repository.TrelloConfigRepository;
 import com.thoughtworks.otr.snconnector.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
@@ -50,9 +52,9 @@ public class TrelloService {
             "https://digitalservices.mercedes-benz.com/nav_to.do?uri=sn_customerservice_case.do?sys_id=%s";
 
     private final TrelloBoardClientImpl trelloBoardClient;
-    private final TrelloListCardClientImpl trelloListCardClient;
     private final TrelloCardClientImpl trelloCardClient;
     private final TrelloConfigRepository trelloConfigRepository;
+    private final ServiceNowSyncDataRepository syncDataRepository;
 
     public TrelloCard createTrelloCard(Squad squad, ServiceNowData serviceNowData) {
         List<ServiceNowDataEntry> serviceNowDataEntries = serviceNowData.getEntries()
@@ -67,7 +69,6 @@ public class TrelloService {
 
         TrelloConfig trelloConfig = trelloConfigRepository.findBySquad(squad)
                                                           .orElseThrow(() -> new TrelloException(String.format("can not found trello config by %s squad", squad.name())));
-
 
         String ticketNumber = earliestServiceNowEntry.getDisplayValue();
         String ticketOpenDate = earliestServiceNowEntry.getSysCreatedOnAdjusted();
@@ -125,7 +126,26 @@ public class TrelloService {
 
         updateTrelloCardDueDateWithSLA(trelloCard);
 
+        saveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
+
         return trelloCard;
+    }
+
+    private void saveServiceNowSyncData(String ticketNumber, ServiceNowDataEntry earliestServiceNowEntry, ServiceNowData serviceNowData, String ticketOpenDate, TrelloConfig trelloConfig, TrelloCard trelloCard) {
+        syncDataRepository.findByTrelloCardId(trelloCard.getId()).ifPresentOrElse(
+                syncData -> log.info("ticket {} service now sync data is exists", syncData.getTicket()),
+                () -> syncDataRepository.save(
+                        ServiceNowSyncData.builder()
+                                          .ticket(ticketNumber)
+                                          .shortDescription(earliestServiceNowEntry.getShortDescription())
+                                          .description(serviceNowData.getTicketFullDescription())
+                                          .serviceNowLink(buildServiceNowLink(earliestServiceNowEntry.getDocumentId()))
+                                          .contact(serviceNowData.getContactUserD8Account())
+                                          .ticketOpenDate(DateUtils.stringToInstant(ticketOpenDate))
+                                          .squad(trelloConfig.getSquad())
+                                          .trelloCardId(trelloCard.getId())
+                                          .build())
+                );
     }
 
     private void createTrelloCardChecklists(TrelloCard trelloCard, List<TrelloConfigCheckList> checkLists) {
