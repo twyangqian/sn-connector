@@ -41,7 +41,7 @@ public final class DateUtils {
         if (Objects.isNull(value)) {
             return null;
         }
-        return DATE_TIME_FORMATTER.format(value);
+        return DATE_TIME_FORMATTER.withZone(DEFAULT_TIME_ZONE).format(value);
     }
 
     public static LocalDateTime stringToLocalDateTime(String value) {
