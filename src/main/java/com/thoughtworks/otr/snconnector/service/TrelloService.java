@@ -16,6 +16,7 @@ import com.thoughtworks.otr.snconnector.dto.TrelloCardCheckList;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardComment;
 import com.thoughtworks.otr.snconnector.entity.TrelloConfig;
 import com.thoughtworks.otr.snconnector.entity.TrelloConfigCheckList;
+import com.thoughtworks.otr.snconnector.enums.CustomFieldItemName;
 import com.thoughtworks.otr.snconnector.enums.ServiceNowEntryFieldName;
 import com.thoughtworks.otr.snconnector.enums.ServiceNowStatus;
 import com.thoughtworks.otr.snconnector.enums.Squad;
@@ -254,18 +255,12 @@ public class TrelloService {
                                               .idCustomField(customField.getValue().getId())
                                               .ModelType("card")
                                               .build();
-        switch (customField.getKey()) {
-            case "Ticket":
-                customFieldItem.setValue(Map.of(customField.getValue().getType(), ticket));
-                break;
-            case "Ticket open date":
-                customFieldItem.setValue(Map.of(customField.getValue().getType(), ticketOpenDate));
-                break;
-            case "Contact":
-                customFieldItem.setValue(Map.of(customField.getValue().getType(), contactUserD8account));
-                break;
-            default:
-                break;
+        if (customField.getKey().equals(CustomFieldItemName.TICKET.getValue())) {
+            customFieldItem.setValue(Map.of(customField.getValue().getType(), ticket));
+        } else if (customField.getKey().equals(CustomFieldItemName.TICKET_OPEN_DATE.getValue())) {
+            customFieldItem.setValue(Map.of(customField.getValue().getType(), ticketOpenDate));
+        } else if (customField.getKey().equals(CustomFieldItemName.CONTACT.getValue())) {
+            customFieldItem.setValue(Map.of(customField.getValue().getType(), contactUserD8account));
         }
         return customFieldItem;
     }
