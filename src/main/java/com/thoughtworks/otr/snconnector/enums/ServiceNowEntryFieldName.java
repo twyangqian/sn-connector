@@ -11,10 +11,10 @@ public enum ServiceNowEntryFieldName {
     COMMENTS("补充备注", "comments"),
     OPENED_BY("提交人", ""),
     IMPACT("影响", ""),
-    STATE("状态", "Status"),
-    PRIORITY("优先级", "Priority"),
+    STATE("状态", CustomFieldItemName.STATUS.value),
+    PRIORITY("优先级", CustomFieldItemName.PRIORITY.value),
     WORK_NOTES("工作注解", "workComments"),
-    ASSIGNED_TO("已指派给", "Assigned to");
+    ASSIGNED_TO("已指派给", CustomFieldItemName.ASSIGNED_TO.value);
 
     final String label;
 
