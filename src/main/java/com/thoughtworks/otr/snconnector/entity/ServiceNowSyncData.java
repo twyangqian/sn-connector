@@ -32,9 +32,7 @@ public class ServiceNowSyncData {
     private String shortDescription;
     private String description;
     private String serviceNowLink;
-    private String priority;
     private String contact;
-    private String assignedTo;
     private Instant ticketOpenDate;
     @Enumerated(EnumType.STRING)
     private Squad squad;
