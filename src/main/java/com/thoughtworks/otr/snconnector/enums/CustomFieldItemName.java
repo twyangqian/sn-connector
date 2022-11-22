@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum CustomFieldItemName {
-    TICKET("ticket"),
+    TICKET("Ticket"),
     PRIORITY("Priority"),
     STATUS("Status"),
     CONTACT("Contact"),
