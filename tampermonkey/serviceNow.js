@@ -172,10 +172,16 @@
         XMLHttpRequest.prototype.open = function (...args) {
             if (args[1].endsWith('angular.do')) {
                 // console.log('args', args)
-                this.addEventListener("readystatechange", function (event) {
-                    responseContents.push({ readyState: this.readyState, content: event.currentTarget.responseText });
+                this.addEventListener("readystatechange",  (event) => {
                     // console.log('ServiceNow readystatechange', this.readyState, event.currentTarget.responseText);
+                    responseContents.push({ readyState: this.readyState, content: event.currentTarget.responseText });
                 }, false);
+                this.addEventListener("load", (event) => {
+                    if (responseContents.length === 0) {
+                        // console.log('ServiceNow load', this.readyState, event.currentTarget.responseText);
+                        responseContents.push({ readyState: this.readyState, content: event.currentTarget.responseText });
+                    }
+                })
             }
 
             open.apply(this, args);
