@@ -28,6 +28,11 @@ public class TrelloCardClientImpl extends TrelloClient implements TrelloCardClie
     }
 
     @Override
+    public TrelloCard getCard(String cardId) {
+        return TRELLO_CARD_MAPPER.toTrelloCard(super.getTrelloApi().getCard(cardId));
+    }
+
+    @Override
     public TrelloCard createCard(TrelloCard card) {
         String url = TrelloUrl.API_URL + TrelloUrl.CREATE_CARD;
         URI fullUri = buildFullURLBuilder(url)
