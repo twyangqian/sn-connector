@@ -280,7 +280,7 @@ public class TrelloService {
             customFieldItem.setValue(Map.of(customField.getValue().getType(), ticket));
         } else if (customField.getKey().equals(CustomFieldItemName.TICKET_OPEN_DATE.getValue())) {
             customFieldItem.setValue(Map.of(customField.getValue().getType(), ticketOpenDate));
-        } else if (customField.getKey().equals(CustomFieldItemName.CONTACT.getValue())) {
+        } else if (customField.getKey().equals(CustomFieldItemName.CONTACT.getValue()) && Objects.nonNull(customField.getValue())) {
             customFieldItem.setValue(Map.of(customField.getValue().getType(), contactUserD8account));
         }
         return customFieldItem;
