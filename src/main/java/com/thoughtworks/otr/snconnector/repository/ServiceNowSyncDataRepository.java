@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface ServiceNowSyncDataRepository extends JpaRepository<ServiceNowSyncData, Long> {
 
     Optional<ServiceNowSyncData> findByTrelloCardId(String trelloCardId);
+    Optional<ServiceNowSyncData> findByTicket(String ticket);
 }

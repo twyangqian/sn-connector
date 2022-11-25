@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -81,7 +82,7 @@ public class TrelloService {
         String trelloListCardId = getOrCreateTODOTrelloListCard(trelloConfig.getTrelloBoardId(), trelloConfig.getDefaultListCardName(), trelloListCards);
         log.info("TODO trello list card id is {}", trelloListCardId);
 
-        TrelloCard trelloCard = getOrCreateTrelloCard(trelloConfig.getTrelloBoardId(), ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
+        TrelloCard trelloCard = getOrCreateTrelloCard(ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
         createTrelloCardChecklists(trelloCard, trelloConfig.getTrelloConfigCheckLists());
 
@@ -291,12 +292,12 @@ public class TrelloService {
                                 .collect(Collectors.toMap(CustomField::getName, Function.identity()));
     }
 
-    private TrelloCard getOrCreateTrelloCard(String boardId, String ticketNumber, String newTrelloCardName, String newTrelloCardDesc, String trelloListCardId) {
+    private TrelloCard getOrCreateTrelloCard(String ticketNumber, String newTrelloCardName, String newTrelloCardDesc, String trelloListCardId) {
         TrelloCard trelloCard;
-        TrelloCard oldTrelloCard = getBoardOldCard(ticketNumber, boardId);
+        Optional<ServiceNowSyncData> serviceNowSyncData = syncDataRepository.findByTicket(ticketNumber);
 
-        if (Objects.nonNull(oldTrelloCard)) {
-            trelloCard = oldTrelloCard;
+        if (serviceNowSyncData.isPresent()) {
+            trelloCard = trelloCardClient.getCard(serviceNowSyncData.get().getTrelloCardId());
         } else {
             log.info("create trello card: {}", newTrelloCardName);
             trelloCard = trelloCardClient.createCard(TrelloCard.builder()
@@ -306,15 +307,6 @@ public class TrelloService {
                                                              .build());
         }
         return trelloCard;
-    }
-
-    private TrelloCard getBoardOldCard(String ticketNumber, String boardId) {
-        return trelloBoardClient.getBoardCards(boardId)
-                        .stream()
-                        .filter(card -> card.getName().contains(ticketNumber))
-                        .findFirst()
-                        .map(TRELLO_CARD_MAPPER::toTrelloCard)
-                        .orElse(null);
     }
 
     private String getOrCreateTODOTrelloListCard(String boardId, String defaultListCard, List<TList> trelloCardList) {
