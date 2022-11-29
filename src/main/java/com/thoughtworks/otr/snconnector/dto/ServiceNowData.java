@@ -23,5 +23,8 @@ public class ServiceNowData {
     private String contactUserD8Account;
 
     @NotBlank
+    private ServiceNowSLA sla;
+
+    @NotBlank
     private List<ServiceNowDataEntry> entries;
 }

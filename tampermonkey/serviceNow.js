@@ -68,6 +68,7 @@
         const syncDataToTrelloUrl = `${syncTrelloUrl}?squad=${currentSelectSquad}`;
         const request_body = JSON.parse(data);
         request_body['ticketFullDescription'] = ticketFullDescription;
+        request_body['sla'] = getTicketSLA();
         setTimeout(() => {
             request_body['contactUserD8Account'] = contactUserD8Account;
             console.log(request_body);
@@ -120,6 +121,21 @@
             contact.click();
         }, 500);
         
+    }
+
+    const getTicketSLA = () => {
+        const businessTimeLeftIndex = 7;
+        const businessElapsedTimeIndex = 8;
+        const businessElapsedPercentageIndex = 9;
+        const slaTable = document.querySelector("#sn_customerservice_case\\.task_sla\\.task_table .list2_body .list_odd");
+        const businessTimeLeft = slaTable.querySelector(`td:nth-child(${businessTimeLeftIndex})`).textContent;
+        const businessElapsed = slaTable.querySelector(`td:nth-child(${businessElapsedTimeIndex})`).textContent;
+        const businessElapsedPercentage = slaTable.querySelector(`td:nth-child(${businessElapsedPercentageIndex})`).textContent;
+        return {
+            "businessTimeLeft": businessTimeLeft,
+            "businessElapsed": businessElapsed,
+            "businessElapsedPercentage": businessElapsedPercentage
+        }
     }
 
     const getSquadSelectValue = () => {

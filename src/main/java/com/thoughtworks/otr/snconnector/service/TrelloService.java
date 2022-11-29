@@ -4,7 +4,6 @@ import com.julienvey.trello.domain.CheckList;
 import com.julienvey.trello.domain.TList;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloBoardClientImpl;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloCardClientImpl;
-import com.thoughtworks.otr.snconnector.client.impl.TrelloListCardClientImpl;
 import com.thoughtworks.otr.snconnector.dto.CustomField;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowData;
@@ -42,15 +41,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.thoughtworks.otr.snconnector.utils.mapper.TrelloCardMapper.TRELLO_CARD_MAPPER;
+import static com.thoughtworks.otr.snconnector.constans.ServiceNowConstant.SERVICE_NOW_LINK_TEMPLATE;
+import static com.thoughtworks.otr.snconnector.constans.ServiceNowConstant.SERVICE_NOW_SLA_TABLE_TEMPLATE;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TrelloService {
-
-    private static final String SERVICE_NOW_LINK_TEMPLATE =
-            "https://digitalservices.mercedes-benz.com/nav_to.do?uri=sn_customerservice_case.do?sys_id=%s";
 
     private final TrelloBoardClientImpl trelloBoardClient;
     private final TrelloCardClientImpl trelloCardClient;
@@ -74,7 +71,7 @@ public class TrelloService {
         String ticketNumber = earliestServiceNowEntry.getDisplayValue();
         String ticketOpenDate = earliestServiceNowEntry.getSysCreatedOnAdjusted();
         String newTrelloCardName = ticketNumber + " " + earliestServiceNowEntry.getShortDescription();
-        String newTrelloCardDesc = serviceNowData.getTicketFullDescription() + "\n" + buildServiceNowLink(earliestServiceNowEntry.getDocumentId());
+        String newTrelloCardDesc = buildTrelloDescription(serviceNowData, earliestServiceNowEntry);
 
         log.info("ticket number: {}, ticket open date: {}, trello card name: {}", ticketNumber, ticketOpenDate, newTrelloCardName);
 
@@ -130,6 +127,19 @@ public class TrelloService {
         saveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
 
         return trelloCard;
+    }
+
+    private String buildTrelloDescription(ServiceNowData serviceNowData, ServiceNowDataEntry earliestServiceNowEntry) {
+        return serviceNowData.getTicketFullDescription() + "\n"
+                + buildServiceNowLink(earliestServiceNowEntry.getDocumentId()) + "\n\n"
+                + buildSLATable(serviceNowData);
+    }
+
+    private String buildSLATable(ServiceNowData serviceNowData) {
+        return String.format(SERVICE_NOW_SLA_TABLE_TEMPLATE,
+                serviceNowData.getSla().getBusinessTimeLeft(),
+                serviceNowData.getSla().getBusinessElapsed(),
+                serviceNowData.getSla().getBusinessElapsedPercentage());
     }
 
     private void saveServiceNowSyncData(String ticketNumber, ServiceNowDataEntry earliestServiceNowEntry, ServiceNowData serviceNowData, String ticketOpenDate, TrelloConfig trelloConfig, TrelloCard trelloCard) {
