@@ -39,10 +39,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.thoughtworks.otr.snconnector.constans.ServiceNowConstant.SERVICE_NOW_LINK_TEMPLATE;
 import static com.thoughtworks.otr.snconnector.constans.ServiceNowConstant.SERVICE_NOW_SLA_TABLE_TEMPLATE;
+import static com.thoughtworks.otr.snconnector.constans.ServiceNowConstant.SLA_TIME_LEFT_REGEX;
 
 @Service
 @RequiredArgsConstructor
@@ -122,7 +125,7 @@ public class TrelloService {
 
         createTrelloCardCustomFieldItem(cardCustomFiledItemMap, trelloCard, remoteCardCustomFieldItemsMap);
 
-        updateTrelloCardDueDateWithSLA(trelloCard);
+        updateTrelloCardDueDateWithSLA(trelloCard, serviceNowData.getSla().getBusinessTimeLeft());
 
         saveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
 
@@ -178,39 +181,26 @@ public class TrelloService {
 
     }
 
-    private void updateTrelloCardDueDateWithSLA(TrelloCard trelloCard) {
-        AtomicReference<Duration> ticketProcessTime = getTicketProcessTime(trelloCard);
-        Date ticketDueDate = DateUtils.localDateTimeToDate(
-                LocalDateTime.now().plus(Duration.ofHours(85).plus(Duration.ofMinutes(20)).minus(ticketProcessTime.get())));
+    private void updateTrelloCardDueDateWithSLA(TrelloCard trelloCard, String businessTimeLeft) {
+        Duration ticketSLATimeLeft = parseTicketSLATimeLeft(businessTimeLeft);
+        Date ticketDueDate = DateUtils.getDueDateByDurationFromNowInWorkDays(ticketSLATimeLeft);
         if (Objects.isNull(trelloCard.getDue()) || trelloCard.getDue().compareTo((ticketDueDate)) != 0) {
             trelloCard.setDue(ticketDueDate);
             trelloCardClient.updateCard(trelloCard);
         }
     }
 
-    private AtomicReference<Duration> getTicketProcessTime(TrelloCard trelloCard) {
-        AtomicReference<Duration> ticketProcessTime = new AtomicReference<>(Duration.ZERO);
-        AtomicReference<ServiceNowDataStatusChange> previousStatusChange = new AtomicReference<>(
-                trelloCard.getServiceNowDataStatusChanges()
-                          .stream()
-                          .findFirst()
-                          .orElse(null));
-        trelloCard.getServiceNowDataStatusChanges().forEach(
-                currentStatusChange -> {
-                    if (!previousStatusChange.get().getStatus().equals(ServiceNowStatus.AWAITING_INFO)) {
-                        ticketProcessTime.set(ticketProcessTime.get().plus(DateUtils.betweenDurationInWorkDays(
-                                DateUtils.stringToLocalDateTime(previousStatusChange.get().getStatusChangeData()),
-                                DateUtils.stringToLocalDateTime(currentStatusChange.getStatusChangeData()))));
-                    }
-                    previousStatusChange.set(currentStatusChange);
-                }
-        );
-        if (previousStatusChange.get().getStatus().equals(ServiceNowStatus.OPEN)) {
-            ticketProcessTime.set(ticketProcessTime.get().plus(DateUtils.betweenDurationInWorkDays(
-                    DateUtils.stringToLocalDateTime(previousStatusChange.get().getStatusChangeData()),
-                    LocalDateTime.now())));
+    private Duration parseTicketSLATimeLeft(String businessTimeLeft) {
+        // businessTimeLeft -> 20 Hours 30 Minutes
+        Pattern pattern = Pattern.compile(SLA_TIME_LEFT_REGEX);
+        Matcher matcher = pattern.matcher(businessTimeLeft);
+        if (matcher.matches()) {
+            String hours = matcher.group(0);
+            String minutes = matcher.group(1);
+            return Duration.parse(String.format("PT%sH%sM", hours, minutes));
         }
-        return ticketProcessTime;
+        log.error("parse business time left error {}", businessTimeLeft);
+        return Duration.ZERO;
     }
 
     private void buildServiceNowStatusChanges(ServiceNowDataEntry entry, TrelloCard trelloCard) {
@@ -308,6 +298,7 @@ public class TrelloService {
 
         if (serviceNowSyncData.isPresent()) {
             trelloCard = trelloCardClient.getCard(serviceNowSyncData.get().getTrelloCardId());
+            trelloCard.setDesc(newTrelloCardDesc);
         } else {
             log.info("create trello card: {}", newTrelloCardName);
             trelloCard = trelloCardClient.createCard(TrelloCard.builder()
