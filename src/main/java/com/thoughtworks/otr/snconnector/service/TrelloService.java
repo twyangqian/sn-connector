@@ -195,8 +195,8 @@ public class TrelloService {
         Pattern pattern = Pattern.compile(SLA_TIME_LEFT_REGEX);
         Matcher matcher = pattern.matcher(businessTimeLeft);
         if (matcher.matches()) {
-            String hours = matcher.group(0);
-            String minutes = matcher.group(1);
+            String hours = matcher.group(1);
+            String minutes = matcher.group(2);
             return Duration.parse(String.format("PT%sH%sM", hours, minutes));
         }
         log.error("parse business time left error {}", businessTimeLeft);
