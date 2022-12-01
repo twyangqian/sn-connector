@@ -11,8 +11,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DateUtils {
@@ -53,28 +55,55 @@ public final class DateUtils {
     }
 
     public static Date localDateTimeToDate(LocalDateTime dateTime) {
-        return Date.from(dateTime.atZone(UTC_TIME_ZONE).toInstant());
+        return Date.from(dateTime.atZone(DEFAULT_TIME_ZONE).toInstant());
     }
 
     public static LocalDateTime dateToLocalDateTime(Date date) {
        return date.toInstant().atZone(UTC_TIME_ZONE).toLocalDateTime();
     }
 
-    public static Duration betweenDurationInWorkDays(LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        if (Objects.isNull(startDateTime) || Objects.isNull(endDateTime)) {
-            return null;
+    public static LocalDateTime nowadays() {
+        return LocalDateTime.now();
+    }
+
+
+    public static boolean isWeekend(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        return dayOfWeek == 1 || dayOfWeek == 7;
+    }
+
+    public static Date getDueDateByDurationFromNowInWorkDays(Duration duration) {
+        AtomicReference<LocalDateTime> currentDueTime = new AtomicReference<>(nowadays().atZone(UTC_TIME_ZONE).toLocalDateTime());
+        AtomicReference<LocalDateTime> currentEndWorkTime = new AtomicReference<>(currentDueTime.get().toLocalDate().atStartOfDay().plusHours(18));
+        AtomicReference<Duration> leftDuration = new AtomicReference<>(duration);
+        while(!leftDuration.get().isZero()) {
+            if (isWeekend(localDateTimeToDate(currentDueTime.get()))) {
+                currentEndWorkTime.set(getNextEndWorkDay(currentDueTime.get()));
+                currentDueTime.set(getNextStartWorkDay(currentDueTime.get()));
+            } else {
+                Duration currentWorkDayLeftTime = Duration.between(currentDueTime.get(), currentEndWorkTime.get());
+                if (leftDuration.get().compareTo(currentWorkDayLeftTime) > 0) {
+                    leftDuration.set(leftDuration.get().minus(currentWorkDayLeftTime));
+                    currentEndWorkTime.set(getNextEndWorkDay(currentDueTime.get()));
+                    currentDueTime.set(getNextStartWorkDay(currentDueTime.get()));
+                } else {
+                    currentDueTime.set(currentDueTime.get().plus(leftDuration.get()));
+                    leftDuration.set(Duration.ZERO);
+                    break;
+                }
+            }
+
         }
-        long betweenDay = Duration.between(startDateTime, endDateTime).toDays();
-        LocalDateTime startDate = startDateTime.toLocalDate().atStartOfDay();
-        LocalDateTime endDate = endDateTime.toLocalDate().atStartOfDay();
-        assert startDate != null;
-        assert endDate != null;
-        Duration betweenDayDuration = Duration.ofHours(9).multipliedBy(betweenDay);
-        if (betweenDay >= 1) {
-            return Duration.between(startDateTime, startDate.plusHours(18))
-                           .plus(betweenDayDuration)
-                           .plus(Duration.between(endDate.plusHours(9), endDateTime));
-        }
-        return Duration.between(startDateTime, endDateTime);
+        return localDateTimeToDate(currentDueTime.get());
+    }
+
+    public static LocalDateTime getNextStartWorkDay(LocalDateTime currentDate) {
+        return currentDate.toLocalDate().atStartOfDay().plusDays(1).plusHours(9);
+    }
+
+    public static LocalDateTime getNextEndWorkDay(LocalDateTime currentDate) {
+        return currentDate.toLocalDate().atStartOfDay().plusDays(1).plusHours(18);
     }
 }
