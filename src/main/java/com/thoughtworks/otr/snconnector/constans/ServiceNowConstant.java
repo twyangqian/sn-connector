@@ -14,5 +14,5 @@ public class ServiceNowConstant {
             "| %s| %s| %s |\n" +
             "```";
 
-    public static final String SLA_TIME_LEFT_REGEX = "^\\s*(\\d{1,2})\\s*Hours\\s*(\\d{1,2})\\s*Minutes$";
+    public static final String SLA_TIME_LEFT_REGEX = "^\\s*(\\d{1,2}\\s*Day){0,1}\\s*(\\d{1,2}\\s*Hours){0,1}\\s*(\\d{1,2}\\s*Minutes){0,1}\\s*$";
 }

@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -42,6 +41,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.thoughtworks.otr.snconnector.constans.ServiceNowConstant.SERVICE_NOW_LINK_TEMPLATE;
 import static com.thoughtworks.otr.snconnector.constans.ServiceNowConstant.SERVICE_NOW_SLA_TABLE_TEMPLATE;
@@ -190,14 +190,28 @@ public class TrelloService {
         }
     }
 
-    private Duration parseTicketSLATimeLeft(String businessTimeLeft) {
-        // businessTimeLeft -> 20 Hours 30 Minutes
+    public Duration parseTicketSLATimeLeft(String businessTimeLeft) {
+        // businessTimeLeft -> 1 Day 20 Hours 30 Minutes
         Pattern pattern = Pattern.compile(SLA_TIME_LEFT_REGEX);
         Matcher matcher = pattern.matcher(businessTimeLeft);
         if (matcher.matches()) {
-            String hours = matcher.group(1);
-            String minutes = matcher.group(2);
-            return Duration.parse(String.format("PT%sH%sM", hours, minutes));
+            AtomicReference<String> days = new AtomicReference<>("0");
+            AtomicReference<String> hours = new AtomicReference<>("0");
+            AtomicReference<String> minutes = new AtomicReference<>("0");
+            IntStream.rangeClosed(1, matcher.groupCount())
+                    .forEach(index -> {
+                        if (Objects.nonNull(matcher.group(index))) {
+                            String extractTime = matcher.group(index).replace(" ", "");
+                            if (extractTime.contains("Day")) {
+                                days.set(extractTime.replace("Day", ""));
+                            } else if (extractTime.contains("Hours")) {
+                                hours.set(extractTime.replace("Hours", ""));
+                            } else {
+                                minutes.set(extractTime.replace("Minutes", ""));
+                            }
+                        }
+                    });
+            return Duration.parse(String.format("P%sDT%sH%sM", days.get(), hours.get(), minutes.get()));
         }
         log.error("parse business time left error {}", businessTimeLeft);
         return Duration.ZERO;
