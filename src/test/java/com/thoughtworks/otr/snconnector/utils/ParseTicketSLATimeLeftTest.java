@@ -36,11 +36,21 @@ class ParseTicketSLATimeLeftTest {
         assertEquals(Duration.of(1, ChronoUnit.DAYS).plusHours(6).plusMinutes(20),
                 trelloService.parseTicketSLATimeLeft(" 1 Day 6 Hours 20 Minutes"));
 
+        assertEquals(Duration.of(1, ChronoUnit.DAYS).plusHours(1).plusMinutes(20),
+                trelloService.parseTicketSLATimeLeft(" 1 Day 1 Hour 20 Minutes"));
+
+        assertEquals(Duration.of(1, ChronoUnit.DAYS).plusHours(1).plusMinutes(1),
+                trelloService.parseTicketSLATimeLeft(" 1 Day 1 Hour 1 Minute"));
+
         assertEquals(Duration.of(1, ChronoUnit.DAYS),
                 trelloService.parseTicketSLATimeLeft(" 1 Day "));
 
         assertEquals(Duration.of(1, ChronoUnit.DAYS).plusHours(6),
                 trelloService.parseTicketSLATimeLeft(" 1 Day 6 Hours "));
+
+        assertEquals(Duration.of(1, ChronoUnit.DAYS).plusHours(1),
+                trelloService.parseTicketSLATimeLeft(" 1 Day 1 Hour "));
+
 
         assertEquals(Duration.of(1, ChronoUnit.DAYS).plusMinutes(20),
                 trelloService.parseTicketSLATimeLeft(" 1 Day 20 Minutes"));
@@ -48,10 +58,19 @@ class ParseTicketSLATimeLeftTest {
         assertEquals(Duration.of(6, ChronoUnit.HOURS).plusMinutes(20),
                 trelloService.parseTicketSLATimeLeft(" 6 Hours 20 Minutes"));
 
+        assertEquals(Duration.of(1, ChronoUnit.HOURS).plusMinutes(20),
+                trelloService.parseTicketSLATimeLeft(" 1 Hour 20 Minutes"));
+
         assertEquals(Duration.of(6, ChronoUnit.HOURS),
                 trelloService.parseTicketSLATimeLeft(" 6 Hours "));
 
+        assertEquals(Duration.of(1, ChronoUnit.HOURS),
+                trelloService.parseTicketSLATimeLeft(" 1 Hour "));
+
         assertEquals(Duration.of(20, ChronoUnit.MINUTES),
                 trelloService.parseTicketSLATimeLeft(" 20 Minutes"));
+
+        assertEquals(Duration.of(1, ChronoUnit.MINUTES),
+                trelloService.parseTicketSLATimeLeft(" 1 Minute"));
     }
 }

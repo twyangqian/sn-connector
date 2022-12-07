@@ -205,10 +205,10 @@ public class TrelloService {
                             String extractTime = matcher.group(index).replace(" ", "");
                             if (extractTime.contains("Day")) {
                                 days.set(extractTime.replace("Day", ""));
-                            } else if (extractTime.contains("Hours")) {
-                                hours.set(extractTime.replace("Hours", ""));
+                            } else if (extractTime.contains("Hour")) {
+                                hours.set(extractTime.replaceAll("Hours?", ""));
                             } else {
-                                minutes.set(extractTime.replace("Minutes", ""));
+                                minutes.set(extractTime.replaceAll("Minutes?", ""));
                             }
                         }
                     });
