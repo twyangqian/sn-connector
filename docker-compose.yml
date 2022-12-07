@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    image: ghcr.io/twyangqian/sn-connector:v0.3.5
+    image: ghcr.io/twyangqian/sn-connector:v0.3.6
     container_name: sn-connector-app
     restart: always
     ports:
