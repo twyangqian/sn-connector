@@ -187,10 +187,8 @@ public class TrelloService {
     private void updateTrelloCardDueDateWithSLA(TrelloCard trelloCard, String businessTimeLeft) {
         Duration ticketSLATimeLeft = parseTicketSLATimeLeft(businessTimeLeft);
         Date ticketDueDate = DateUtils.getDueDateByDurationFromNowInWorkDays(ticketSLATimeLeft);
-        if (Objects.isNull(trelloCard.getDue()) || trelloCard.getDue().compareTo((ticketDueDate)) != 0) {
-            trelloCard.setDue(ticketDueDate);
-            trelloCardClient.updateCard(trelloCard);
-        }
+        trelloCard.setDue(ticketDueDate);
+        trelloCardClient.updateCard(trelloCard);
     }
 
     public Duration parseTicketSLATimeLeft(String businessTimeLeft) {
