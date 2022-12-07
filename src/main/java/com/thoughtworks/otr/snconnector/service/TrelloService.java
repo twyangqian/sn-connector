@@ -106,15 +106,18 @@ public class TrelloService {
                               .collect(Collectors.toMap(CustomFieldItem::getIdCustomField, Function.identity()));
 
         log.info("get remote trello card custom field items");
-        Map<String, String> remoteCardCustomFieldItemsMap = trelloCardClient.getCardCustomFieldItems(trelloCard.getId())
-                                                               .stream()
-                                                               .collect(
-                                                                       Collectors.toMap(
-                                                                               CustomFieldItem::getIdCustomField,
-                                                                               customFieldItem -> customFieldItem.getValue().values()
-                                                                                                                 .stream()
-                                                                                                                 .reduce(String::concat)
-                                                                                                                 .orElse(null)));
+        Map<String, String> remoteCardCustomFieldItemsMap =
+                trelloCardClient.getCardCustomFieldItems(trelloCard.getId())
+                                .stream()
+                                .filter(customFieldItem ->
+                                        Objects.nonNull(customFieldItem.getValue()))
+                                .collect(
+                                        Collectors.toMap(
+                                                CustomFieldItem::getIdCustomField,
+                                                customFieldItem -> customFieldItem.getValue().values()
+                                                                                  .stream()
+                                                                                  .reduce(String::concat)
+                                                                                  .orElse("nothing")));
 
         log.info("create trello card custom field item and comments");
         serviceNowDataEntries.forEach(entry -> {
@@ -282,7 +285,7 @@ public class TrelloService {
                                              .equals(customFieldItem.getValue().values()
                                                                     .stream()
                                                                     .reduce(String::concat)
-                                                                    .orElse(null));
+                                                                    .orElse("nothing"));
     }
 
     private CustomFieldItem buildCustomFieldItem(String ticket, String ticketOpenDate, String contactUserD8account, Map.Entry<String, CustomField> customField) {
