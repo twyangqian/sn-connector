@@ -84,6 +84,8 @@ public class TrelloService {
 
         TrelloCard trelloCard = getOrCreateTrelloCard(ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
+        saveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
+
         createTrelloCardChecklists(trelloCard, trelloConfig.getTrelloConfigCheckLists());
 
         log.info("get trello card actions");
@@ -129,8 +131,6 @@ public class TrelloService {
         createTrelloCardCustomFieldItem(cardCustomFiledItemMap, trelloCard, remoteCardCustomFieldItemsMap);
 
         updateTrelloCardDueDateWithSLA(trelloCard, serviceNowData.getSla().getBusinessTimeLeft());
-
-        saveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
 
         return trelloCard;
     }
