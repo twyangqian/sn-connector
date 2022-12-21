@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS `service_now_sync_file`(
     FOREIGN KEY (`service_now_sync_data_id`) REFERENCES service_now_sync_data(`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE INDEX `idx_ticket` on `service_now_sync_data_file`(`ticket`);
+CREATE INDEX `idx_ticket` on `service_now_sync_file`(`ticket`);
