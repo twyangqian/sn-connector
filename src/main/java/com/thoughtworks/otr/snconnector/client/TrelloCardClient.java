@@ -1,11 +1,11 @@
 package com.thoughtworks.otr.snconnector.client;
 
-import com.julienvey.trello.domain.Attachment;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
 import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardCheckList;
 
+import java.io.File;
 import java.util.List;
 
 public interface TrelloCardClient {
@@ -18,5 +18,5 @@ public interface TrelloCardClient {
     void updateCard(TrelloCard card);
     List<TrelloCardCheckList> getCardCheckLists(String cardId);
     TrelloCardCheckList createCardCheckList(String cardId, TrelloCardCheckList trelloCardCheckList);
-    Attachment createCardAttachment(String cardId, Attachment attachment);
+    void createCardAttachment(String cardId, File file);
 }

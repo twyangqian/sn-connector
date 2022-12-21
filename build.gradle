@@ -40,6 +40,7 @@ dependencies {
 	implementation 'mysql:mysql-connector-java'
 	implementation 'org.flywaydb:flyway-core'
 	implementation "org.flywaydb:flyway-mysql"
+	implementation 'commons-io:commons-io:2.11.0'
 
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

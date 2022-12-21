@@ -1,6 +1,5 @@
 package com.thoughtworks.otr.snconnector.client.impl;
 
-import com.julienvey.trello.domain.Attachment;
 import com.julienvey.trello.impl.TrelloUrl;
 import com.thoughtworks.otr.snconnector.client.TrelloCardClient;
 import com.thoughtworks.otr.snconnector.client.TrelloClient;
@@ -12,6 +11,7 @@ import com.thoughtworks.otr.snconnector.dto.TrelloCard;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardCheckList;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -98,11 +98,7 @@ public class TrelloCardClientImpl extends TrelloClient implements TrelloCardClie
     }
 
     @Override
-    public Attachment createCardAttachment(String cardId, Attachment attachment) {
-        String url = TrelloUrl.API_URL + TrelloUrl.ADD_ATTACHMENT_TO_CARD;
-        URI fullUrl = buildFullURLBuilder(url)
-                .buildAndExpand(cardId)
-                .toUri();
-        return super.getRestTemplate().postForObject(fullUrl, attachment, Attachment.class);
+    public void createCardAttachment(String cardId, File file) {
+        super.getTrelloApi().addAttachmentToCard(cardId, file);
     }
 }

@@ -1,6 +1,5 @@
 package com.thoughtworks.otr.snconnector.service;
 
-import com.julienvey.trello.domain.Attachment;
 import com.julienvey.trello.domain.CheckList;
 import com.julienvey.trello.domain.TList;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloBoardClientImpl;
@@ -9,7 +8,6 @@ import com.thoughtworks.otr.snconnector.dto.CustomField;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowData;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowDataEntry;
-import com.thoughtworks.otr.snconnector.dto.ServiceNowDataFile;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowDataStatusChange;
 import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
@@ -28,10 +26,12 @@ import com.thoughtworks.otr.snconnector.repository.ServiceNowSyncDataRepository;
 import com.thoughtworks.otr.snconnector.repository.ServiceNowSyncFileRepository;
 import com.thoughtworks.otr.snconnector.repository.TrelloConfigRepository;
 import com.thoughtworks.otr.snconnector.utils.DateUtils;
+import com.thoughtworks.otr.snconnector.utils.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Comparator;
@@ -91,27 +91,7 @@ public class TrelloService {
 
         ServiceNowSyncData serviceNowSyncData = saveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
 
-        serviceNowData.getFiles()
-                      .stream()
-                      .filter(file ->
-                              serviceNowSyncData.getServiceNowSyncFiles()
-                                                .stream()
-                                                .noneMatch(syncFile -> syncFile.getUrlLink().equals(file.getUrlLink())))
-                      .forEach(file -> {
-                          log.info("create file for ticket: {}, file name: {}, file link: {}", ticketNumber, file.getName(), file.getUrlLink());
-                          Attachment attachment = new Attachment(file.getUrlLink());
-                          attachment.setName(file.getName());
-                          trelloCardClient.createCardAttachment(trelloCard.getId(), attachment);
-                          syncFileRepository.save(
-                                  ServiceNowSyncFile.builder()
-                                                    .name(file.getName())
-                                                    .urlLink(file.getUrlLink())
-                                                    .ticket(ticketNumber)
-                                                    .serviceNowSyncData(serviceNowSyncData)
-                                                    .build()
-                          );
-                      });
-
+        addAttachmentToCard(serviceNowData, ticketNumber, trelloCard, serviceNowSyncData);
 
 
         createTrelloCardChecklists(trelloCard, trelloConfig.getTrelloConfigCheckLists());
@@ -161,6 +141,31 @@ public class TrelloService {
         updateTrelloCardDueDateWithSLA(trelloCard, serviceNowData.getSla().getBusinessTimeLeft());
 
         return trelloCard;
+    }
+
+    private void addAttachmentToCard(ServiceNowData serviceNowData, String ticketNumber, TrelloCard trelloCard, ServiceNowSyncData serviceNowSyncData) {
+        serviceNowData.getFiles()
+                      .stream()
+                      .filter(file ->
+                              serviceNowSyncData.getServiceNowSyncFiles()
+                                                .stream()
+                                                .noneMatch(syncFile -> syncFile.getUrlLink().equals(file.getUrlLink())))
+                      .forEach(file -> {
+                          log.info("create file for ticket: {}, file name: {}, file link: {}", ticketNumber, file.getName(), file.getUrlLink());
+                          try {
+                              trelloCardClient.createCardAttachment(trelloCard.getId(), FileUtil.base64ToFile(file.getName(), file.getBase64String()));
+                          } catch (IOException e) {
+                              log.error("convert base64 failed");
+                          }
+                          syncFileRepository.save(
+                                  ServiceNowSyncFile.builder()
+                                                    .name(file.getName())
+                                                    .urlLink(file.getUrlLink())
+                                                    .ticket(ticketNumber)
+                                                    .serviceNowSyncData(serviceNowSyncData)
+                                                    .build()
+                          );
+                      });
     }
 
     private String buildTrelloDescription(ServiceNowData serviceNowData, ServiceNowDataEntry earliestServiceNowEntry) {

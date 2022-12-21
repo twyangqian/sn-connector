@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 
 @Controller
 @AllArgsConstructor

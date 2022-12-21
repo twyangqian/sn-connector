@@ -14,4 +14,5 @@ import lombok.Setter;
 public class ServiceNowDataFile {
     private String name;
     private String urlLink;
+    private String base64String;
 }
