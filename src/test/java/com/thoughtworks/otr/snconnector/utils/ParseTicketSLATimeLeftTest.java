@@ -3,6 +3,7 @@ package com.thoughtworks.otr.snconnector.utils;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloBoardClientImpl;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloCardClientImpl;
 import com.thoughtworks.otr.snconnector.repository.ServiceNowSyncDataRepository;
+import com.thoughtworks.otr.snconnector.repository.ServiceNowSyncFileRepository;
 import com.thoughtworks.otr.snconnector.repository.TrelloConfigRepository;
 import com.thoughtworks.otr.snconnector.service.TrelloService;
 import org.junit.jupiter.api.Test;
@@ -27,9 +28,11 @@ class ParseTicketSLATimeLeftTest {
     TrelloConfigRepository trelloConfigRepository;
     @Mock
     ServiceNowSyncDataRepository syncDataRepository;
+    @Mock
+    ServiceNowSyncFileRepository syncFileRepository;
 
     @InjectMocks
-    TrelloService trelloService = new TrelloService(trelloBoardClient, trelloCardClient, trelloConfigRepository, syncDataRepository);
+    TrelloService trelloService = new TrelloService(trelloBoardClient, trelloCardClient, trelloConfigRepository, syncDataRepository, syncFileRepository);
 
     @Test
     void parse_tests() {
