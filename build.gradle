@@ -20,6 +20,9 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven {
+		url "https://packages.atlassian.com/maven/repository/public"
+	}
 }
 
 dependencies {
@@ -40,6 +43,9 @@ dependencies {
 	implementation 'mysql:mysql-connector-java'
 	implementation 'org.flywaydb:flyway-core'
 	implementation "org.flywaydb:flyway-mysql"
+	implementation 'com.atlassian.jira:jira-rest-java-client-core:4.0.0'
+	implementation 'com.atlassian.fugue:fugue:2.6.1'
+	implementation "org.springframework.boot:spring-boot-starter-freemarker"
 
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
