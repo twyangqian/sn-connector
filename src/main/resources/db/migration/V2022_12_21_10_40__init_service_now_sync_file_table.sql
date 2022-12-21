@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS `service_now_sync_file`(
     `ticket` varchar(100) NOT NULL,
     `name` TEXT NOT NULL,
     `url_link` VARCHAR(500) NOT NULL,
+    `service_now_sync_data_id` bigint(10) NOT NULL,
     `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
