@@ -1,5 +1,6 @@
 package com.thoughtworks.otr.snconnector.service;
 
+import com.julienvey.trello.domain.Attachment;
 import com.julienvey.trello.domain.CheckList;
 import com.julienvey.trello.domain.TList;
 import com.thoughtworks.otr.snconnector.client.impl.TrelloBoardClientImpl;
@@ -8,12 +9,14 @@ import com.thoughtworks.otr.snconnector.dto.CustomField;
 import com.thoughtworks.otr.snconnector.dto.CustomFieldItem;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowData;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowDataEntry;
+import com.thoughtworks.otr.snconnector.dto.ServiceNowDataFile;
 import com.thoughtworks.otr.snconnector.dto.ServiceNowDataStatusChange;
 import com.thoughtworks.otr.snconnector.dto.TrelloAction;
 import com.thoughtworks.otr.snconnector.dto.TrelloCard;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardCheckList;
 import com.thoughtworks.otr.snconnector.dto.TrelloCardComment;
 import com.thoughtworks.otr.snconnector.entity.ServiceNowSyncData;
+import com.thoughtworks.otr.snconnector.entity.ServiceNowSyncFile;
 import com.thoughtworks.otr.snconnector.entity.TrelloConfig;
 import com.thoughtworks.otr.snconnector.entity.TrelloConfigCheckList;
 import com.thoughtworks.otr.snconnector.enums.CustomFieldItemName;
@@ -22,6 +25,7 @@ import com.thoughtworks.otr.snconnector.enums.ServiceNowStatus;
 import com.thoughtworks.otr.snconnector.enums.Squad;
 import com.thoughtworks.otr.snconnector.exception.TrelloException;
 import com.thoughtworks.otr.snconnector.repository.ServiceNowSyncDataRepository;
+import com.thoughtworks.otr.snconnector.repository.ServiceNowSyncFileRepository;
 import com.thoughtworks.otr.snconnector.repository.TrelloConfigRepository;
 import com.thoughtworks.otr.snconnector.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +60,7 @@ public class TrelloService {
     private final TrelloCardClientImpl trelloCardClient;
     private final TrelloConfigRepository trelloConfigRepository;
     private final ServiceNowSyncDataRepository syncDataRepository;
+    private final ServiceNowSyncFileRepository syncFileRepository;
 
     public TrelloCard createTrelloCard(Squad squad, ServiceNowData serviceNowData) {
         List<ServiceNowDataEntry> serviceNowDataEntries = serviceNowData.getEntries()
@@ -84,7 +89,30 @@ public class TrelloService {
 
         TrelloCard trelloCard = getOrCreateTrelloCard(ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
-        saveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
+        ServiceNowSyncData serviceNowSyncData = saveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
+
+        serviceNowData.getFiles()
+                      .stream()
+                      .filter(file ->
+                              serviceNowSyncData.getServiceNowSyncFiles()
+                                                .stream()
+                                                .noneMatch(syncFile -> syncFile.getUrlLink().equals(file.getUrlLink())))
+                      .forEach(file -> {
+                          log.info("create file for ticket: {}, file name: {}, file link: {}", ticketNumber, file.getName(), file.getUrlLink());
+                          Attachment attachment = new Attachment(file.getUrlLink());
+                          attachment.setName(file.getName());
+                          trelloCardClient.createCardAttachment(trelloCard.getId(), attachment);
+                          syncFileRepository.save(
+                                  ServiceNowSyncFile.builder()
+                                                    .name(file.getName())
+                                                    .urlLink(file.getUrlLink())
+                                                    .ticket(ticketNumber)
+                                                    .serviceNowSyncData(serviceNowSyncData)
+                                                    .build()
+                          );
+                      });
+
+
 
         createTrelloCardChecklists(trelloCard, trelloConfig.getTrelloConfigCheckLists());
 
@@ -148,21 +176,24 @@ public class TrelloService {
                 serviceNowData.getSla().getBusinessElapsedPercentage());
     }
 
-    private void saveServiceNowSyncData(String ticketNumber, ServiceNowDataEntry earliestServiceNowEntry, ServiceNowData serviceNowData, String ticketOpenDate, TrelloConfig trelloConfig, TrelloCard trelloCard) {
-        syncDataRepository.findByTrelloCardId(trelloCard.getId()).ifPresentOrElse(
-                syncData -> log.info("ticket {} service now sync data is exists", syncData.getTicket()),
-                () -> syncDataRepository.save(
-                        ServiceNowSyncData.builder()
-                                          .ticket(ticketNumber)
-                                          .shortDescription(earliestServiceNowEntry.getShortDescription())
-                                          .description(serviceNowData.getTicketFullDescription())
-                                          .serviceNowLink(buildServiceNowLink(earliestServiceNowEntry.getDocumentId()))
-                                          .contact(serviceNowData.getContactUserD8Account())
-                                          .ticketOpenDate(DateUtils.stringToInstant(ticketOpenDate))
-                                          .squad(trelloConfig.getSquad())
-                                          .trelloCardId(trelloCard.getId())
-                                          .build())
-                );
+    private ServiceNowSyncData saveServiceNowSyncData(String ticketNumber, ServiceNowDataEntry earliestServiceNowEntry, ServiceNowData serviceNowData, String ticketOpenDate, TrelloConfig trelloConfig, TrelloCard trelloCard) {
+        Optional<ServiceNowSyncData> serviceNowSyncData = syncDataRepository.findByTrelloCardId(trelloCard.getId());
+        if (serviceNowSyncData.isPresent()) {
+            log.info("ticket {} service now sync data is exists", serviceNowSyncData.get().getTicket());
+            return serviceNowSyncData.get();
+        } else {
+            return syncDataRepository.save(
+                    ServiceNowSyncData.builder()
+                                      .ticket(ticketNumber)
+                                      .shortDescription(earliestServiceNowEntry.getShortDescription())
+                                      .description(serviceNowData.getTicketFullDescription())
+                                      .serviceNowLink(buildServiceNowLink(earliestServiceNowEntry.getDocumentId()))
+                                      .contact(serviceNowData.getContactUserD8Account())
+                                      .ticketOpenDate(DateUtils.stringToInstant(ticketOpenDate))
+                                      .squad(trelloConfig.getSquad())
+                                      .trelloCardId(trelloCard.getId())
+                                      .build());
+        }
     }
 
     private void createTrelloCardChecklists(TrelloCard trelloCard, List<TrelloConfigCheckList> checkLists) {

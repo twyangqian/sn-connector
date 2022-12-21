@@ -27,4 +27,6 @@ public class ServiceNowData {
 
     @NotBlank
     private List<ServiceNowDataEntry> entries;
+
+    private List<ServiceNowDataFile> files;
 }

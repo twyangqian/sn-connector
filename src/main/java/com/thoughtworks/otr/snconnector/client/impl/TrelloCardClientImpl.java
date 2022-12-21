@@ -1,5 +1,6 @@
 package com.thoughtworks.otr.snconnector.client.impl;
 
+import com.julienvey.trello.domain.Attachment;
 import com.julienvey.trello.impl.TrelloUrl;
 import com.thoughtworks.otr.snconnector.client.TrelloCardClient;
 import com.thoughtworks.otr.snconnector.client.TrelloClient;
@@ -94,5 +95,14 @@ public class TrelloCardClientImpl extends TrelloClient implements TrelloCardClie
     @Override
     public TrelloCardCheckList createCardCheckList(String cardId, TrelloCardCheckList trelloCardCheckList) {
         return TRELLO_CARD_MAPPER.toTrelloCardCheckList(super.getTrelloApi().createCheckList(cardId, trelloCardCheckList));
+    }
+
+    @Override
+    public Attachment createCardAttachment(String cardId, Attachment attachment) {
+        String url = TrelloUrl.API_URL + TrelloUrl.ADD_ATTACHMENT_TO_CARD;
+        URI fullUrl = buildFullURLBuilder(url)
+                .buildAndExpand(cardId)
+                .toUri();
+        return super.getRestTemplate().postForObject(fullUrl, attachment, Attachment.class);
     }
 }
