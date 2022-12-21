@@ -52,6 +52,7 @@
 
     const syncTrelloUrl = "http://10.205.129.7:8080/api/sn-connector/trello/cards";
     let contactUserD8Account = null;
+    const files = [];
 
     function changeButton(button, buttonText, styleCursor, color) {
         button.innerHTML = buttonText;
@@ -69,6 +70,7 @@
         const request_body = JSON.parse(data);
         request_body['ticketFullDescription'] = ticketFullDescription;
         request_body['sla'] = getTicketSLA();
+        request_body['files'] = files;
         setTimeout(() => {
             request_body['contactUserD8Account'] = contactUserD8Account;
             console.log(request_body);
@@ -103,6 +105,54 @@
                 }
             });
         }, 500);
+    }
+
+    const blobToBase64 = (blob) => {
+        return new Promise((resolve, _) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    const getTicketFiles = () => {
+        const filesDom = document.querySelectorAll("div.sn-card-component.sn-card-component_attachment.state-selectable a");
+        filesDom.forEach(file => {
+            const fileName = file.attributes['file-name'].nodeValue;
+            const urlLink = file.firstChild.currentSrc;
+            console.log(fileName);
+            console.log(urlLink);
+
+            GM_xmlhttpRequest({
+                method: "get",
+                url: urlLink,
+                responseType: "blob",
+                headers:  {
+                    "Content-Type": "application/json"
+                },
+                onload: function(res) {
+                    if(res.status === 200){
+                        console.log("获取文件成功", fileName);
+                        blobToBase64(res.response)
+                            .then(result => {
+                                console.log(result);
+                                files.push({
+                                    "name": fileName,
+                                    "urlLink": urlLink,
+                                    "base64String": result
+                                });
+                            })
+                    } else {
+                        console.log("获取文件失败", fileName);
+                        console.log(res)
+                    }
+                },
+                onerror : function(err){
+                    console.log("获取文件失败", fileName);
+                    console.log(err)
+                }
+            });
+        })
     }
 
     function getTicketDescription() {
@@ -151,9 +201,9 @@
         button.onclick = function() {
             const { length } = responseContents;
             if (length) {
+                getTicketFiles();
                 getContactUserD8Account();
                 syncDataToTrello(responseContents[length - 1].content);
-
             }
         }
         Object.keys(buttonStyles).forEach(key => {
