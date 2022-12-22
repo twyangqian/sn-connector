@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 @Controller
@@ -31,13 +32,13 @@ public class TrelloController {
     @PostMapping("/cards")
     public ResponseEntity<TrelloCard> createTrelloCard(
             @RequestParam("squad") @NotBlank Squad squad,
-            @RequestBody ServiceNowData serviceNowData) {
+            @RequestBody @Valid ServiceNowData serviceNowData) {
         return ResponseEntity.ok(trelloService.createTrelloCard(squad, serviceNowData));
     }
 
     @PostMapping("/config")
     public ResponseEntity<TrelloConfigDTO> createOrUpdateTrelloConfig(
-            @RequestBody TrelloConfigDTO trelloConfigDTO) {
+            @RequestBody @Valid TrelloConfigDTO trelloConfigDTO) {
         return ResponseEntity.ok(trelloConfigService.createOrUpdateTrelloConfig(trelloConfigDTO));
     }
 

@@ -21,13 +21,12 @@ public class ServiceNowData {
     private String ticketFullDescription;
 
     @NotBlank
-    @NotNull
     private String contactUserD8Account;
 
-    @NotBlank
+    @NotNull
     private ServiceNowSLA sla;
 
-    @NotBlank
+    @NotNull
     private List<ServiceNowDataEntry> entries;
 
     private List<ServiceNowDataFile> files;
