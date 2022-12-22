@@ -32,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Comparator;
@@ -93,7 +95,6 @@ public class TrelloService {
 
         addAttachmentToCard(serviceNowData, ticketNumber, trelloCard, serviceNowSyncData);
 
-
         createTrelloCardChecklists(trelloCard, trelloConfig.getTrelloConfigCheckLists());
 
         log.info("get trello card actions");
@@ -154,6 +155,7 @@ public class TrelloService {
                           log.info("create file for ticket: {}, file name: {}, file link: {}", ticketNumber, file.getName(), file.getUrlLink());
                           try {
                               trelloCardClient.createCardAttachment(trelloCard.getId(), FileUtil.base64ToFile(file.getName(), file.getBase64String()));
+                              Files.deleteIfExists(Path.of(file.getName()));
                           } catch (IOException e) {
                               log.error("convert base64 failed");
                           }
