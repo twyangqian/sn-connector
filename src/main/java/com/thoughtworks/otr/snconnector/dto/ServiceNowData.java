@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Getter
@@ -20,6 +21,7 @@ public class ServiceNowData {
     private String ticketFullDescription;
 
     @NotBlank
+    @NotNull
     private String contactUserD8Account;
 
     @NotBlank
