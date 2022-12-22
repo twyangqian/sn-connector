@@ -52,6 +52,7 @@
 
     const syncTrelloUrl = "http://10.205.129.7:8080/api/sn-connector/trello/cards";
     let contactUserD8Account = null;
+    const serviceNowUrl = "https://digitalservices.mercedes-benz.com";
     const files = [];
 
     function changeButton(button, buttonText, styleCursor, color) {
@@ -70,9 +71,9 @@
         const request_body = JSON.parse(data);
         request_body['ticketFullDescription'] = ticketFullDescription;
         request_body['sla'] = getTicketSLA();
-        request_body['files'] = files;
         setTimeout(() => {
             request_body['contactUserD8Account'] = contactUserD8Account;
+            request_body['files'] = files;
             console.log(request_body);
             GM_xmlhttpRequest({
                 method: "post",
@@ -104,7 +105,7 @@
                         }, 2000);
                 }
             });
-        }, 500);
+        }, 3000);
     }
 
     const blobToBase64 = (blob) => {
@@ -116,26 +117,20 @@
     }
 
     const getTicketFiles = () => {
-        const filesDom = document.querySelectorAll("div.sn-card-component.sn-card-component_attachment.state-selectable a");
-        filesDom.forEach(file => {
-            const fileName = file.attributes['file-name'].nodeValue;
-            const urlLink = file.firstChild.currentSrc;
-            console.log(fileName);
-            console.log(urlLink);
-
+        function fetchFileBlob(urlLink, fileName) {
             GM_xmlhttpRequest({
                 method: "get",
                 url: urlLink,
                 responseType: "blob",
-                headers:  {
+                headers: {
                     "Content-Type": "application/json"
                 },
-                onload: function(res) {
-                    if(res.status === 200){
+                onload: function (res) {
+                    if (res.status === 200) {
                         console.log("获取文件成功", fileName);
+                        console.log(res);
                         blobToBase64(res.response)
                             .then(result => {
-                                console.log(result);
                                 files.push({
                                     "name": fileName,
                                     "urlLink": urlLink,
@@ -147,11 +142,26 @@
                         console.log(res)
                     }
                 },
-                onerror : function(err){
+                onerror: function (err) {
                     console.log("获取文件失败", fileName);
                     console.log(err)
                 }
             });
+        }
+
+        const imageFilesDom = document.querySelectorAll("div.sn-card-component.sn-card-component_attachment.state-selectable a");
+        const excelFilesDom = document.querySelectorAll("div.sn-card-component.sn-card-component_headline.sn-card-component_headline_sm.sn-card-component_attachment a");
+
+        imageFilesDom.forEach(file => {
+            const fileName = file.attributes['file-name'].nodeValue;
+            const urlLink = file.firstChild.currentSrc.split('?t=')[0];
+            fetchFileBlob(urlLink, fileName);
+        })
+
+        excelFilesDom.forEach(file => {
+            const fileName = file.attributes['file-name'].nodeValue;
+            const urlLink = serviceNowUrl + file.attributes['href'].nodeValue;
+            fetchFileBlob(urlLink, fileName);
         })
     }
 
@@ -193,7 +203,7 @@
     }
 
 
-    function createButton(id, styles) {
+    function createButton() {
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
         button.setAttribute('id', buttonId);
@@ -230,7 +240,7 @@
     }
 
     if (window.location.pathname.endsWith('sn_customerservice_case.do')) {
-        createButton(buttonId, buttonStyles);
+        createButton();
         createSquadSelect();
     }
 
