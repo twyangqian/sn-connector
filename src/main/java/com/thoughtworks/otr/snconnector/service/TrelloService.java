@@ -91,7 +91,7 @@ public class TrelloService {
 
         TrelloCard trelloCard = getOrCreateTrelloCard(ticketNumber, newTrelloCardName, newTrelloCardDesc, trelloListCardId);
 
-        ServiceNowSyncData serviceNowSyncData = saveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
+        ServiceNowSyncData serviceNowSyncData = getOrSaveServiceNowSyncData(ticketNumber, earliestServiceNowEntry, serviceNowData, ticketOpenDate, trelloConfig, trelloCard);
 
         addAttachmentToCard(serviceNowData, ticketNumber, trelloCard, serviceNowSyncData);
 
@@ -183,7 +183,7 @@ public class TrelloService {
                 serviceNowData.getSla().getBusinessElapsedPercentage());
     }
 
-    private ServiceNowSyncData saveServiceNowSyncData(String ticketNumber, ServiceNowDataEntry earliestServiceNowEntry, ServiceNowData serviceNowData, String ticketOpenDate, TrelloConfig trelloConfig, TrelloCard trelloCard) {
+    private ServiceNowSyncData getOrSaveServiceNowSyncData(String ticketNumber, ServiceNowDataEntry earliestServiceNowEntry, ServiceNowData serviceNowData, String ticketOpenDate, TrelloConfig trelloConfig, TrelloCard trelloCard) {
         Optional<ServiceNowSyncData> serviceNowSyncData = syncDataRepository.findByTrelloCardId(trelloCard.getId());
         if (serviceNowSyncData.isPresent()) {
             log.info("ticket {} service now sync data is exists", serviceNowSyncData.get().getTicket());

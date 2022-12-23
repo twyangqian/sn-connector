@@ -117,7 +117,7 @@
     }
 
     const getTicketFiles = () => {
-        function fetchFileBlob(urlLink, fileName) {
+        const fetchFileBlob = (urlLink, fileName) => {
             GM_xmlhttpRequest({
                 method: "get",
                 url: urlLink,
@@ -150,7 +150,7 @@
         }
 
         const imageFilesDom = document.querySelectorAll("div.sn-card-component.sn-card-component_attachment.state-selectable a");
-        const excelFilesDom = document.querySelectorAll("div.sn-card-component.sn-card-component_headline.sn-card-component_headline_sm.sn-card-component_attachment a");
+        const otherFilesDom = document.querySelectorAll("div.sn-card-component.sn-card-component_headline.sn-card-component_headline_sm.sn-card-component_attachment a");
 
         imageFilesDom.forEach(file => {
             const fileName = file.attributes['file-name'].nodeValue;
@@ -158,7 +158,7 @@
             fetchFileBlob(urlLink, fileName);
         })
 
-        excelFilesDom.forEach(file => {
+        otherFilesDom.forEach(file => {
             const fileName = file.attributes['file-name'].nodeValue;
             const urlLink = serviceNowUrl + file.attributes['href'].nodeValue;
             fetchFileBlob(urlLink, fileName);
