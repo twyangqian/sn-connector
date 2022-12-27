@@ -17,7 +17,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ServiceNowData {
 
-    @NotBlank
     private String ticketFullDescription;
 
     @NotBlank

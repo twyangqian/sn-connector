@@ -29,6 +29,7 @@ import com.thoughtworks.otr.snconnector.utils.DateUtils;
 import com.thoughtworks.otr.snconnector.utils.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -73,6 +74,10 @@ public class TrelloService {
         ServiceNowDataEntry earliestServiceNowEntry = serviceNowDataEntries.stream().findFirst().orElse(null);
         if (Objects.isNull(earliestServiceNowEntry)) {
             throw new TrelloException("no data in service now request body");
+        }
+
+        if (StringUtils.isBlank(serviceNowData.getTicketFullDescription())) {
+            serviceNowData.setTicketFullDescription(earliestServiceNowEntry.getShortDescription());
         }
 
         TrelloConfig trelloConfig = trelloConfigRepository.findBySquad(squad)
